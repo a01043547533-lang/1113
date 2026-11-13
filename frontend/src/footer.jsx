@@ -42,66 +42,60 @@ const STATE_LABEL = { fresh: "최신", old: "다시 받을 차례", wait: "아�
 
 function Freshness({ status, loading, onRefresh }) {
   const now = Date.now();
+  const items = status?.items || [];
+  const fresh = items.filter((it) => state(it, now) === "fresh").length;
+  const latest = items.map((it) => it.updated_at).filter(Boolean).sort().pop();
   return (
-    <section className="fresh" aria-labelledby="fresh-title">
-      <div className="fresh-head">
-        <div>
-          <h2 id="fresh-title">데이터 갱신 현황</h2>
-          <p>
-            각 기관 공공데이터를 받아 온 시각입니다.
-            {status?.now && ` ${kst(status.now, { month: "long", day: "numeric", hour: "2-digit", minute: "2-digit" })} 기준`}
-          </p>
-        </div>
-        <button type="button" className="pill-btn light sm" onClick={onRefresh} disabled={loading}>
-          {loading ? "확인 중…" : "다시 확인"}
-        </button>
-      </div>
+    <details className="fresh">
+      <summary className="fresh-sum">
+        <i className={`st st-${items.length && fresh === items.length ? "fresh" : fresh ? "old" : "wait"}`} aria-hidden="true" />
+        <span className="fresh-line">
+          <strong>데이터 갱신</strong>
+          {status ? (
+            <>
+              <span>최신 {fresh}/{items.length}</span>
+              {latest && <span>마지막 {ago(latest, now)}</span>}
+            </>
+          ) : (
+            <span>{loading ? "확인 중…" : "정보 없음"}</span>
+          )}
+        </span>
+        <span className="fresh-more">자세히</span>
+      </summary>
 
-      {!status && !loading && <p className="fresh-empty">갱신 정보를 불러오지 못했습니다. ‘다시 확인’을 눌러 주세요.</p>}
-      {status && (
-        <div className="fresh-table" role="table" aria-label="자료별 마지막 갱신 시각">
-          <div className="fresh-row head" role="row">
-            <span role="columnheader">자료</span>
-            <span role="columnheader">제공 기관</span>
-            <span role="columnheader">갱신 주기</span>
-            <span role="columnheader">마지막 갱신</span>
-          </div>
-          {status.items.map((it) => {
-            const st = state(it, now);
-            return (
-              <div className="fresh-row" role="row" key={it.key}>
-                <span role="cell" className="fresh-name">
-                  <i className={`st st-${st}`} title={STATE_LABEL[st]} aria-hidden="true" />
-                  <span>
-                    <strong>{it.name}</strong>
-                    {it.note && <em>{it.note}</em>}
-                  </span>
-                </span>
-                <span role="cell" className="fresh-org"><b className="m">제공</b>{it.org}</span>
-                <span role="cell" className="fresh-cycle"><b className="m">주기</b>{it.cycle}</span>
-                <span role="cell" className="fresh-time">
-                  {it.updated_at ? (
-                    <>
-                      <strong>{ago(it.updated_at, now)}</strong>
-                      <time dateTime={it.updated_at}>
-                        {kst(it.updated_at, { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </time>
-                    </>
-                  ) : (
-                    <span className="muted">{st === "off" ? "받지 않음" : "누군가 처음 찾을 때 받아요"}</span>
-                  )}
-                </span>
-              </div>
-            );
-          })}
+      <div className="fresh-body">
+        <div className="fresh-tools">
+          <span>
+            각 기관 공공데이터를 받아 온 시각
+            {status?.now && ` · ${kst(status.now, { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })} 기준`}
+          </span>
+          <button type="button" className="link-btn sm" onClick={onRefresh} disabled={loading}>
+            {loading ? "확인 중…" : "다시 확인"}
+          </button>
         </div>
-      )}
-      <ul className="fresh-legend" aria-label="상태 표시 설명">
-        <li><i className="st st-fresh" aria-hidden="true" />최신</li>
-        <li><i className="st st-old" aria-hidden="true" />주기가 지나 다음 검색 때 다시 받음</li>
-        <li><i className="st st-wait" aria-hidden="true" />서버가 켜진 뒤 아직 안 받음</li>
-      </ul>
-    </section>
+        {!status && !loading && <p className="fresh-empty">갱신 정보를 불러오지 못했습니다.</p>}
+        {status && (
+          <ul className="fresh-list" aria-label="자료별 마지막 갱신 시각">
+            {items.map((it) => {
+              const st = state(it, now);
+              return (
+                <li key={it.key}>
+                  <i className={`st st-${st}`} title={STATE_LABEL[st]} aria-hidden="true" />
+                  <span className="fl-name">{it.name}<em>{it.org} · {it.cycle}</em></span>
+                  <span className="fl-time">
+                    {it.updated_at ? (
+                      <time dateTime={it.updated_at} title={kst(it.updated_at, { month: "numeric", day: "numeric", hour: "2-digit", minute: "2-digit" })}>
+                        {ago(it.updated_at, now)}
+                      </time>
+                    ) : (st === "off" ? "받지 않음" : "아직 안 받음")}
+                  </span>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </div>
+    </details>
   );
 }
 
