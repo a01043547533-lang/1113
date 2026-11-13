@@ -198,20 +198,18 @@ async def highlights():
 
 # ------------------------------------------------------------------ 시험: 지역 순위
 def ranking(sido: str, preset: str | None, limit: int = 10) -> list[dict]:
+    """고른 분야의 관련 기능사. 전국 응시자 수 순서(지역과 상관없이 같은 순서), 고른 지역 인원도 함께."""
     st = stats()
     local = st["by_sido"].get(sido, {})
-    total = sum(local.values()) or 1
-    nat_rank = {n: i + 1 for i, n in enumerate(st["national"])}
     subs = set(PRESETS[preset]["subfields"]) if preset else None
     out = []
-    for name, cnt in local.items():
+    for name, cnt in st["national"].items():
         m = st["meta"].get(name, {})
         if subs is not None and m.get("subfield") not in subs:
             continue
         out.append({
-            "name": name, "jmcd": m.get("jmcd"), "count": cnt, "share": round(cnt / total, 4),
+            "name": name, "jmcd": m.get("jmcd"), "count": cnt, "local_count": local.get(name, 0),
             "always": name in st["always"], "field": m.get("subfield"),
-            "national_rank": nat_rank.get(name),
         })
     out.sort(key=lambda x: -x["count"])
     for i, x in enumerate(out[:limit]):

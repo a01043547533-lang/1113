@@ -184,3 +184,32 @@ li.open .chev { transform: rotate(-135deg) translate(-3px, -3px); }
   .rank.age .chev { grid-column: 3; grid-row: 1 / span 2; }
   .rank.age .age-no, .rank.age .age-grade { grid-row: span 2; }
 }
+
+/* 50·60대 순위: 맨 아래 접어 두는 참고 자료 */
+.agetop-wrap { margin-top: 44px; padding-top: 28px; border-top: 1px solid var(--line); }
+.agetop { padding: 0; background: var(--surface-2); }
+.agetop[open] { background: linear-gradient(180deg, var(--mint-wash), var(--surface) 70%); padding-bottom: 20px; }
+.agetop-sum { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 14px; padding: 18px 22px; min-height: 64px; }
+.agetop-sum::-webkit-details-marker { display: none; }
+.ref-tag { flex: none; font-size: 14px; font-weight: 700; color: var(--ink-2); border: 1px solid var(--line-2); background: var(--surface); border-radius: 6px; padding: 2px 9px; }
+.agetop-sum-text { display: grid; min-width: 0; }
+.agetop-sum-text strong { font-size: 18px; font-weight: 650; }
+.agetop-sum-text span { font-size: 15px; color: var(--ink-3); }
+.agetop-more { margin-left: auto; flex: none; font-size: 15px; font-weight: 600; color: var(--link); }
+.agetop-more::after { content: ""; display: inline-block; width: 8px; height: 8px; margin-left: 8px; border-right: 2px solid currentColor; border-bottom: 2px solid currentColor; transform: translateY(-3px) rotate(45deg); transition: transform .2s; }
+.agetop[open] .agetop-more::after { transform: translateY(1px) rotate(-135deg); }
+.agetop[open] .agetop-sum { border-bottom: 1px solid var(--line); }
+.agetop > :not(summary) { margin-inline: 22px; }
+.agetop .agetop-head { margin-top: 16px; }
+.pillsm.age-badge { background: var(--ink); color: var(--mint); }
+@media (max-width: 640px) {
+  .agetop-sum { padding: 14px 16px; gap: 10px; }
+  .agetop-sum-text strong { font-size: 17px; }
+  .agetop-sum-text span { font-size: 15px; }
+  .agetop > :not(summary) { margin-inline: 14px; }
+}
+
+/* 관련 자격증: 전국 인원 + 고른 지역 인원 */
+.rank-count { display: grid; justify-items: end; line-height: 1.35; }
+.rank-local { font-size: 14px; font-weight: 500; color: var(--ink-3); }
+@media (max-width: 640px) { .rank-count { justify-items: start; } .rank-local { font-size: 15px; } }

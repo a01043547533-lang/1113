@@ -122,6 +122,8 @@ def test_ranking_from_stats_file():
     top = ranking("대구", None, limit=5)
     assert [x["rank"] for x in top] == [1, 2, 3, 4, 5]
     assert top[0]["count"] >= top[-1]["count"]
+    assert [x["name"] for x in ranking("대구", "조리·제과제빵")] == [x["name"] for x in ranking("제주", "조리·제과제빵")]  # 전국 순서
+    assert all("local_count" in x for x in top)
     cook = ranking("대구", "조리·제과제빵")
     assert cook and all(x["field"] in ("조리", "제과.제빵") for x in cook)
     assert any(x["always"] for x in cook)        # 조리·제과제빵 기능사는 상시 시험

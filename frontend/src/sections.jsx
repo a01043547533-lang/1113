@@ -146,7 +146,20 @@ function CertDetail({ jmcd, sido }) {
   );
 }
 
-function AgeTop({ info, open, toggle, sido }) {
+// 50·60대 순위에 있는 자격증 이름 → 배지 설명(예: "50대 1위 · 60대 1위")
+function ageBadges(info) {
+  const m = new Map();
+  if (!info) return m;
+  for (const [age, rows] of Object.entries(info.groups)) {
+    for (const r of rows) {
+      const t = `${age.replace(" 이상", "+")} ${r.rank ? r.rank + "위" : "인기"}`;
+      m.set(r.name, m.has(r.name) ? `${m.get(r.name)} · ${t}` : t);
+    }
+  }
+  return m;
+}
+
+function AgeTop({ info, open, toggle, sido, startOpen }) {
   const ages = Object.keys(info.groups);
   const [age, setAge] = useState(ages[0]);
   const rows = info.groups[age] || [];
@@ -162,14 +175,17 @@ function AgeTop({ info, open, toggle, sido }) {
     </li>
   );
   return (
-    <section className="agetop" aria-labelledby="agetop-title">
+    <details className="agetop" open={startOpen}>
+      <summary className="agetop-sum">
+        <span className="ref-tag">참고</span>
+        <span className="agetop-sum-text">
+          <strong>50대·60대가 많이 응시한 자격증 (전국)</strong>
+          <span>50대·60대 모두 지게차운전기능사가 1위예요</span>
+        </span>
+        <span className="agetop-more">펼치기</span>
+      </summary>
       <div className="agetop-head">
-        <div>
-          <h3 id="agetop-title" className="tab-title">50대·60대가 많이 응시한 자격증</h3>
-          <p className="tab-note">
-            전국 기준이에요. 누르면 {sido}의 다음 시험 일정, 응시료, 시험장이 나옵니다.
-          </p>
-        </div>
+        <p className="tab-note">누르면 {sido}의 다음 시험 일정, 응시료, 시험장이 나옵니다.</p>
         <div className="seg" role="tablist" aria-label="나이대">
           {ages.map((a) => (
             <button key={a} type="button" role="tab" aria-selected={age === a} className={age === a ? "on" : ""} onClick={() => setAge(a)}>
@@ -204,7 +220,7 @@ function AgeTop({ info, open, toggle, sido }) {
         출처: {info.source} ({info.released.replaceAll("-", ".")} 발표) · {info.population} 기준 순위.
         공단은 나이별 종목 인원을 공개하지 않아 순위만 보여 줍니다.
       </p>
-    </section>
+    </details>
   );
 }
 
@@ -213,15 +229,20 @@ export function ExamTab({ data, sido, preset }) {
   const { ranking, featured, external, year, grade } = data;
   const max = ranking[0]?.count || 1;
   const toggle = (code) => setOpen(open === code ? null : code);
+  const badges = ageBadges(data.age_top);
+  const AgeBadge = ({ name }) => (badges.has(name)
+    ? <span className="pillsm age-badge" title={`전국 ${badges.get(name)} (한국산업인력공단 발표)`}>50·60대 인기</span>
+    : null);
+  const nothingMain = ranking.length === 0 && featured.length === 0 && external.length === 0;
 
   return (
     <div>
-      {data.age_top && <AgeTop info={data.age_top} open={open} toggle={toggle} sido={sido} />}
       {ranking.length > 0 && (
         <>
-          <h3 className="tab-title">{sido}에서 많이 응시한 {preset} 자격증</h3>
+          <h3 className="tab-title">{preset} 관련 자격증</h3>
           <p className="tab-note">
-            {year}년 {grade} 접수자 수 순서입니다. 나이별 숫자는 공개되지 않아 전체 접수자로 셉니다. 누르면 일정과 시험장이 나와요.
+            {year}년 전국 응시자가 많은 순서예요. 누르면 {sido}의 다음 시험 일정, 응시료, 시험장이 나와요.
+            ‘50·60대 인기’는 50대·60대가 전국에서 많이 응시한 자격증이에요.
           </p>
           <ol className="rank">
             {ranking.map((r) => (
@@ -232,10 +253,14 @@ export function ExamTab({ data, sido, preset }) {
                     <span className="rank-name">
                       {r.name}
                       {r.always && <span className="pillsm">상시 시험</span>}
+                      <AgeBadge name={r.name} />
                     </span>
                     <span className="bar" aria-hidden="true"><span style={{ width: `${(r.count / max) * 100}%` }} /></span>
                   </span>
-                  <span className="rank-count">{num(r.count)}명</span>
+                  <span className="rank-count">
+                    전국 {num(r.count)}명
+                    <span className="rank-local">{sido} {num(r.local_count)}명</span>
+                  </span>
                   <span className="chev" aria-hidden="true" />
                 </button>
                 {open === r.jmcd && <CertDetail jmcd={r.jmcd} sido={sido} />}
@@ -247,12 +272,13 @@ export function ExamTab({ data, sido, preset }) {
 
       {(featured.length > 0 || external.length > 0) && (
         <>
-          <h3 className="tab-title">{preset} 분야 자격증</h3>
+          <h3 className="tab-title">{ranking.length > 0 ? "함께 보면 좋은 자격증" : `${preset} 관련 자격증`}</h3>
+          {ranking.length === 0 && <p className="tab-note">누르면 {sido}의 다음 시험 일정, 응시료, 시험장이 나와요.</p>}
           <ol className="rank plain">
             {featured.map((f) => (
               <li key={f.jmcd} className={open === f.jmcd ? "open" : ""}>
                 <button type="button" className="rank-btn" onClick={() => toggle(f.jmcd)} aria-expanded={open === f.jmcd}>
-                  <span className="rank-main"><span className="rank-name">{f.name}</span></span>
+                  <span className="rank-main"><span className="rank-name">{f.name}<AgeBadge name={f.name} /></span></span>
                   <span className="rank-count sub">{f.kind}</span>
                   <span className="chev" aria-hidden="true" />
                 </button>
@@ -270,6 +296,12 @@ export function ExamTab({ data, sido, preset }) {
             </div>
           ))}
         </>
+      )}
+
+      {data.age_top && (
+        <div className="agetop-wrap">
+          <AgeTop info={data.age_top} open={open} toggle={toggle} sido={sido} startOpen={nothingMain} />
+        </div>
       )}
     </div>
   );
