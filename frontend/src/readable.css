@@ -80,3 +80,31 @@
   .agencies .btn, .ext .btn, .alert .btn { font-size: 16px; }
   .age-grade { font-size: 16px; }
 }
+
+/* ---------- 바닥 글자: 요청에 따라 두 단계(2px씩) 작게. 누르는 영역 44px은 유지 ---------- */
+.foot .logo-text { font-size: 17px; }
+.foot-brand p { font-size: 15px; }
+.foot .fresh-line strong, .foot .fresh-line span, .foot .fresh-more { font-size: 13px; }
+.foot .fresh-tools, .foot .link-btn.sm { font-size: 13px; }
+.foot .fl-name { font-size: 13px; }
+.foot .fl-name em { font-size: 12px; }
+.foot .fl-time { font-size: 13px; }
+.foot-cols h3 { font-size: 13px; }
+.foot-cols ul { font-size: 15px; }
+.foot-sub { font-size: 13px; }
+.foot-num { font-size: 20px; }
+.foot-bottom { font-size: 13px; }
+@media (max-width: 640px) {
+  .foot-brand p { font-size: 15px; }
+  .foot .fresh-line strong, .foot .fresh-line span, .foot .fresh-more { font-size: 14px; }
+  .foot .fresh-tools, .foot .link-btn.sm, .foot .fl-time { font-size: 14px; }
+  .foot .fl-name { font-size: 14px; }
+  .foot .fl-name em { font-size: 13px; }
+  .foot-cols h3 { font-size: 14px; }
+  .foot-cols ul { font-size: 15px; }
+  .foot-sub, .foot-bottom { font-size: 14px; }
+}
+
+/* ---------- '세 가지' 띠의 배우고·취득하고·다시 일하기: 요청에 따라 두 단계(2px씩) 크게 ---------- */
+.step-copy .kicker { font-size: 19px; font-weight: 700; }
+@media (max-width: 640px) { .step-copy .kicker { font-size: 20px; } }
