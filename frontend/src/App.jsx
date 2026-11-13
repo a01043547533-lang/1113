@@ -1,191 +1,309 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { HeroSun, Horizon, Logo, Reflection, StripeDefs, StripeIcon } from "./art.jsx";
+import Results from "./results.jsx";
 
-const WORK24_JOBS = "https://www.work24.go.kr/wk/a/b/1200/retriveDtlEmpSrchList.do";
+const FALLBACK_SIDO = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
+  "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
+const FALLBACK_PRESETS = ["요양보호사", "간호조무사", "사회복지", "경비·보안", "청소·미화", "조리·주방",
+  "바리스타·제과", "운전·배송", "사무보조", "회계·세무", "생산·제조", "전기·설비", "공인중개",
+  "IT·사무자동화", "돌봄·보육"];
 
-function deadlineText(j) {
-  if (j.until_filled) return "채용 시까지";
-  if (!j.close_date) return "마감일 미정";
-  if (j.days_left === 0) return `오늘 마감 (${j.close_date})`;
-  return `마감 ${j.close_date} (D-${j.days_left})`;
+const CLEANING_STEPS = [
+  "시급·일급·연봉을 모두 월급으로 바꿔 보여드려요",
+  "마감된 공고는 미리 빼 드려요",
+  "여러 지역에 올라온 같은 공고는 하나로 합쳐요",
+  "이미 시작한 훈련과정은 목록에서 뺐어요",
+  "회차만 다른 같은 과정은 가장 빠른 회차만 남겨요",
+  "중장년에게 맞는 공고부터 위에 보여드려요",
+];
+
+const FAQ = [
+  ["정말 무료인가요?", "네, 무료입니다. 회원가입도 없고, 지역과 직종만 고르면 바로 볼 수 있어요."],
+  ["제 정보를 저장하나요?",
+    "아니요. 이름·연락처 같은 개인정보는 받지 않아요. 고르신 지역과 직종도 검색할 때만 쓰고 저장하지 않아요."],
+  ["‘적합도’ 점수는 무엇인가요?",
+    "공고 제목에 ‘중장년 우대’, ‘연령무관’ 같은 말이 있는지, 경력·학력 조건이 까다롭지 않은지를 보고 매긴 참고 점수예요. 채용 공고에는 나이 조건을 적을 수 없어서, 이런 신호로 50대 이상에게 맞을 만한 공고를 위로 올려 드려요."],
+  ["국민내일배움카드는 누가 받을 수 있나요?",
+    "대부분의 구직자와 재직자가 신청할 수 있지만 일부 예외가 있어요. 정확한 자격과 자부담 비율은 고용24에서 확인해 주세요."],
+  ["공고 내용이 실제와 달라요.",
+    "공고와 과정 정보는 고용24에서 가져와요. 지원하거나 등록하기 전에 ‘자세히 보기’를 눌러 원래 페이지에서 꼭 확인해 주세요."],
+];
+
+function useReveal() {
+  useEffect(() => {
+    const els = document.querySelectorAll("[data-reveal]");
+    if (!("IntersectionObserver" in window)) {
+      els.forEach((el) => el.classList.add("in"));
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => e.isIntersecting && (e.target.classList.add("in"), io.unobserve(e.target))),
+      { threshold: 0.15 }
+    );
+    els.forEach((el) => io.observe(el));
+    return () => io.disconnect();
+  }, []);
 }
 
-const won = (n) => (n == null ? "-" : n.toLocaleString("ko-KR") + "원");
-
-function salaryText(s) {
-  if (!s) return "-";
-  if (s.type === "negotiable") return "면접 후 결정";
-  if (s.type === "unknown") return s.text || "급여 미기재";
-  const lo = s.monthly_min, hi = s.monthly_max;
-  let t = hi ? `월 ${won(lo)} ~ ${won(hi)}` : `월 ${won(lo)} 이상`;
-  if (s.estimated) t += ` (${s.type_label} ${won(s.min_raw)} 환산)`;
-  return t;
-}
-
-function Flags({ flags }) {
-  const labels = {
-    title_truncated: "제목 잘림",
-    salary_missing: "급여 미기재",
-    salary_suspiciously_low: "급여 확인 필요",
-    region_unparsed: "지역 확인",
-    cost_zero_check: "훈련비 0원(확인)",
-    cost_missing: "훈련비 미기재",
-  };
-  const shown = flags.filter((f) => labels[f]);
-  if (!shown.length) return null;
+function CyclingList({ items }) {
+  const [active, setActive] = useState(0);
+  useEffect(() => {
+    if (window.matchMedia?.("(prefers-reduced-motion: reduce)").matches) return;
+    const id = setInterval(() => setActive((a) => (a + 1) % items.length), 2200);
+    return () => clearInterval(id);
+  }, [items.length]);
   return (
-    <div className="flags">
-      {shown.map((f) => (
-        <span key={f} className="flag">{labels[f]}</span>
+    <ul className="cycle">
+      {items.map((t, i) => (
+        <li key={t} className={i === active ? "on" : i < active ? "done" : ""}>
+          <span className="tick" aria-hidden="true">
+            <svg viewBox="0 0 20 20"><path d="m5 10.5 3.2 3.2L15 7" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" /></svg>
+          </span>
+          {t}
+        </li>
       ))}
+    </ul>
+  );
+}
+
+function FeatureRow({ title, items }) {
+  return (
+    <div className="feature" data-reveal>
+      <h2 className="feature-title">{title}</h2>
+      <div className="feature-items">
+        {items.map(([icon, head, body]) => (
+          <div key={head} className="feature-item">
+            <StripeIcon name={icon} />
+            <h3>{head}</h3>
+            <p>{body}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
 
-function JobCard({ j }) {
-  return (
-    <a className="card" href={j.url || "#"} target="_blank" rel="noreferrer">
-      <div className="card-top">
-        <span className={"score s" + Math.floor(j.senior_score / 25)}>{j.senior_score}</span>
-        <h3>{j.title}{j.title_truncated && "…"}</h3>
-      </div>
-      <p className="muted">{j.company} · {j.regions.map((r) => r.raw).join(", ")}</p>
-      <p>{salaryText(j.salary)}</p>
-      <p className="muted small">
-        {j.career.text || "경력무관"} · {j.education_min || "학력무관"} · {j.work_type || ""}
-        {j.emp_type ? ` · ${j.emp_type}` : ""}
-      </p>
-      <p className="small">{deadlineText(j)}</p>
-      {j.senior_reasons.length > 0 && <p className="small why">{j.senior_reasons.join(" / ")}</p>}
-      <Flags flags={j.quality_flags} />
-    </a>
-  );
-}
-
-function TrainingCard({ t }) {
-  return (
-    <a className="card" href={t.url || "#"} target="_blank" rel="noreferrer">
-      <div className="card-top">
-        <span className="score t">{t.score}</span>
-        <h3>{t.title}</h3>
-      </div>
-      <p className="muted">{t.institution || "기관 미상"} · {t.address || "-"}</p>
-      <p>
-        {t.start_date} 시작 · {t.duration_weeks ? `${t.duration_weeks}주` : "-"} · {t.weekend || ""}
-        {t.days_until_start != null && ` · D-${t.days_until_start}`}
-      </p>
-      <p className="small">
-        훈련비 {won(t.total_cost)} <span className="muted">(자부담은 카드 종류·소득에 따라 달라요)</span>
-      </p>
-      <p className="small">
-        {t.satisfaction != null ? `만족도 ${t.satisfaction}점` : "만족도 평가 없음"}
-        {(t.employment_rate_6m ?? t.employment_rate_3m) != null &&
-          ` · 취업률 ${t.employment_rate_6m ?? t.employment_rate_3m}%`}
-        {t.capacity ? ` · 정원 ${t.capacity}명` : ""}
-      </p>
-      {t.training_type && <p className="small muted">{t.training_type}</p>}
-      <Flags flags={t.quality_flags} />
-    </a>
-  );
+function readUrl() {
+  const q = new URLSearchParams(window.location.search);
+  return { sido: q.get("sido") || "", preset: q.get("preset") || "", keyword: q.get("keyword") || "" };
 }
 
 export default function App() {
-  const [meta, setMeta] = useState(null);
-  const [form, setForm] = useState({ sido: "대구", preset: "요양보호사", keyword: "", age: 55 });
+  const init = readUrl();
+  const [meta, setMeta] = useState({ sido: FALLBACK_SIDO, presets: FALLBACK_PRESETS });
+  const [sido, setSido] = useState(init.sido || "서울");
+  const [preset, setPreset] = useState(init.keyword ? "" : init.preset || "요양보호사");
+  const [custom, setCustom] = useState(!!init.keyword && !init.preset);
+  const [keyword, setKeyword] = useState(init.keyword);
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const resultsRef = useRef(null);
+  const searchRef = useRef(null);
+
+  useReveal();
 
   useEffect(() => {
-    fetch("/api/meta").then((r) => r.json()).then(setMeta).catch(() => {});
+    fetch("/api/meta")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then((m) => setMeta({ sido: m.sido, presets: m.presets }))
+      .catch(() => {});
+    if (init.sido && (init.preset || init.keyword)) search();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const search = async (e) => {
+  async function search(e) {
     e?.preventDefault();
-    if (!form.preset && !form.keyword.trim()) {
-      setError("희망 직종을 고르거나 검색어를 입력해 주세요.");
+    const kw = keyword.trim();
+    if (custom && !kw) {
+      setError("찾고 싶은 일을 입력해 주세요. 예: 급식, 주차관리");
       return;
     }
     setLoading(true);
     setError("");
+    const p = new URLSearchParams({ sido });
+    if (custom) p.set("keyword", kw);
+    else p.set("preset", preset);
+    window.history.replaceState(null, "", "?" + p.toString());
     try {
-      const p = new URLSearchParams({ sido: form.sido });
-      if (form.age) p.set("age", form.age);
-      if (form.preset) p.set("preset", form.preset);
-      else p.set("keyword", form.keyword.trim());
       const r = await fetch("/api/match?" + p.toString());
-      if (!r.ok) throw new Error(`서버 응답 ${r.status}`);
+      if (!r.ok) throw new Error(String(r.status));
       setData(await r.json());
-    } catch (err) {
-      setError("정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
+      requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
+    } catch {
       setData(null);
+      setError("정보를 불러오지 못했어요. 잠시 후 다시 시도해 주세요.");
     } finally {
       setLoading(false);
     }
-  };
+  }
+
+  function goSearch(e) {
+    e?.preventDefault();
+    searchRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    setTimeout(() => searchRef.current?.querySelector("select")?.focus({ preventScroll: true }), 400);
+  }
 
   return (
-    <main>
-      <header>
-        <h1>50+ 재취업 길잡이</h1>
-        <p className="muted">지역과 희망 직종을 고르면 채용공고와 국비 훈련과정을 한 화면에 보여드려요.</p>
+    <>
+      <StripeDefs />
+      <a className="skip" href="#search">검색으로 바로 가기</a>
+
+      <header className="nav">
+        <div className="wrap nav-in">
+          <a href="/" className="nav-logo" aria-label="50+ 재취업 길잡이 처음으로"><Logo /></a>
+          <nav className="nav-links" aria-label="주요 메뉴">
+            <a href="#how">이용 방법</a>
+            <a href="#faq">자주 묻는 질문</a>
+          </nav>
+          <a href="#search" className="btn btn-primary btn-sm" onClick={goSearch}>바로 찾기</a>
+        </div>
       </header>
 
-      <form className="search" onSubmit={search}>
-        <label>지역
-          <select value={form.sido} onChange={(e) => setForm({ ...form, sido: e.target.value })}>
-            {(meta?.sido || ["대구"]).map((s) => <option key={s}>{s}</option>)}
-          </select>
-        </label>
-        <label>희망 직종
-          <select value={form.preset} onChange={(e) => setForm({ ...form, preset: e.target.value })}>
-            <option value="">직접 입력</option>
-            {(meta?.presets || []).map((s) => <option key={s}>{s}</option>)}
-          </select>
-        </label>
-        {!form.preset && (
-          <label>검색어
-            <input value={form.keyword} placeholder="예: 급식" onChange={(e) => setForm({ ...form, keyword: e.target.value })} />
-          </label>
-        )}
-        <label>나이 (선택)
-          <input type="number" min="15" max="99" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
-        </label>
-        <button disabled={loading}>{loading ? "찾는 중…" : "찾기"}</button>
-      </form>
+      <main>
+        {/* ---------------------------------------------------------- 히어로 */}
+        <section className="hero">
+          <div className="wrap">
+            <p className="eyebrow">50세 이상을 위한 무료 재취업 정보</p>
+            <h1 className="hero-title">
+              <HeroSun className="hero-sun" />
+              <span className="hero-line">일자리와 국비교육,</span>
+              <span className="hero-line">한 번에.</span>
+            </h1>
+            <p className="hero-sub">
+              사는 곳과 하고 싶은 일만 고르세요.{" "}<br />
+              채용공고와 국비 훈련과정을 한 화면에 모아 드려요.
+            </p>
+          </div>
 
-      {error && <p className="error">{error}</p>}
-      {data?.notes && <ul className="notes">{data.notes.map((n) => <li key={n}>{n}</li>)}</ul>}
-
-      {data && (
-        <div className="columns">
-          <section>
-            <h2>채용공고 <small>{data.jobs.count ?? 0}건 (전체 {data.jobs.total})</small></h2>
-            {data.jobs.error && (
-              <div className="error">
-                <p>지금은 채용공고를 불러오지 못했어요.</p>
-                <p><a href={WORK24_JOBS} target="_blank" rel="noreferrer">고용24에서 직접 찾아보기 →</a></p>
-                <p className="small muted">{data.jobs.error}</p>
+          {/* 검색 패널 = 서비스 화면 */}
+          <div className="wrap">
+            <form id="search" ref={searchRef} className="panel" onSubmit={search} aria-label="일자리와 교육 찾기">
+              <div className="panel-step">
+                <label className="step-label" htmlFor="sido"><span className="num">1</span>어디에 사세요?</label>
+                <div className="select">
+                  <select id="sido" value={sido} onChange={(e) => setSido(e.target.value)}>
+                    {meta.sido.map((s) => <option key={s}>{s}</option>)}
+                  </select>
+                </div>
               </div>
-            )}
-            {!data.jobs.error && data.jobs.items?.length === 0 && <p className="empty">조건에 맞는 공고가 없어요.</p>}
-            {data.jobs.items?.map((j) => <JobCard key={j.id} j={j} />)}
-          </section>
-          <section>
-            <h2>국비 훈련과정 <small>{data.trainings.count ?? 0}건 (전체 {data.trainings.total})</small></h2>
-            {data.trainings.notice && <p className="notice">{data.trainings.notice}</p>}
-            {data.trainings.error && <p className="error">국비 훈련과정을 불러오지 못했어요. ({data.trainings.error})</p>}
-            {!data.trainings.error && data.trainings.items?.length === 0 && (
-              <p className="empty">앞으로 3개월 안에 시작하는 과정이 없어요.</p>
-            )}
-            {data.trainings.items?.map((t) => <TrainingCard key={t.id + t.round} t={t} />)}
-          </section>
-        </div>
-      )}
 
-      <footer>
-        <p>자료 출처: 고용24 채용정보 · 국민내일배움카드 훈련과정 OPEN-API. 공고와 과정의 최신 내용은 각 상세 페이지에서 꼭 확인해 주세요.</p>
-        <p>이 서비스는 이름·연락처 등 개인정보를 수집하거나 저장하지 않습니다.</p>
+              <fieldset className="panel-step">
+                <legend className="step-label"><span className="num">2</span>어떤 일을 찾으세요?</legend>
+                <div className="chips">
+                  {meta.presets.map((p) => (
+                    <button
+                      type="button"
+                      key={p}
+                      className={"chip" + (!custom && preset === p ? " on" : "")}
+                      aria-pressed={!custom && preset === p}
+                      onClick={() => { setPreset(p); setCustom(false); }}
+                    >
+                      {p}
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className={"chip chip-outline" + (custom ? " on" : "")}
+                    aria-pressed={custom}
+                    onClick={() => setCustom(true)}
+                  >
+                    직접 입력
+                  </button>
+                </div>
+                {custom && (
+                  <input
+                    className="text"
+                    autoFocus
+                    value={keyword}
+                    onChange={(e) => setKeyword(e.target.value)}
+                    placeholder="예: 급식, 주차관리, 택배"
+                    aria-label="찾고 싶은 일"
+                  />
+                )}
+              </fieldset>
+
+              <div className="panel-foot">
+                <button className="btn btn-primary btn-lg" disabled={loading}>
+                  {loading ? <><span className="spin" aria-hidden="true" />찾는 중이에요…</> : "일자리·교육 찾기"}
+                </button>
+                <p className="panel-note">회원가입 없이 무료 · 개인정보를 저장하지 않아요</p>
+              </div>
+              {error && <p className="alert" role="alert">{error}</p>}
+            </form>
+          </div>
+
+          <div ref={resultsRef} className="wrap results-wrap" aria-live="polite">
+            {data && <Results data={data} />}
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------- 파란 띠 */}
+        <section className="band" aria-labelledby="band-title">
+          <div className="band-in">
+            <p className="eyebrow light">대신 정리해 드려요</p>
+            <h2 id="band-title" className="band-title">
+              복잡한 공고, 읽기 쉽게{" "}<br />바꿔서 보여드려요
+            </h2>
+            <CyclingList items={CLEANING_STEPS} />
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------- 기능 */}
+        <section id="how" className="features wrap">
+          <FeatureRow
+            title={<>세 번만 누르면{" "}<br />끝나요</>}
+            items={[
+              ["pin", "지역 고르기", "지금 사는 시·도를 고르세요."],
+              ["work", "하고 싶은 일 고르기", "요양보호사, 경비, 조리, 사무보조 등 15가지 중에서 고르거나 직접 적어요."],
+              ["list", "한 화면에서 비교", "왼쪽엔 채용공고, 오른쪽엔 배울 수 있는 국비과정이 나와요."],
+            ]}
+          />
+          <FeatureRow
+            title={<>중장년을 먼저{" "}<br />생각했어요</>}
+            items={[
+              ["zoom", "큰 글씨, 쉬운 말", "작은 글씨와 어려운 용어를 빼고, 꼭 필요한 정보만 크게 보여드려요."],
+              ["gauge", "적합도 점수", "‘중장년 우대’, ‘경력무관’ 같은 조건을 살펴 맞을 만한 공고부터 보여드려요."],
+              ["shield", "개인정보 저장 안 함", "로그인도, 연락처 입력도 없어요. 보고 바로 닫으셔도 돼요."],
+            ]}
+          />
+        </section>
+
+        {/* ---------------------------------------------------------- FAQ */}
+        <section id="faq" className="faq wrap" data-reveal>
+          <h2 className="section-title">자주 묻는 질문</h2>
+          <div className="faq-list">
+            {FAQ.map(([q, a]) => (
+              <details key={q}>
+                <summary>{q}<span className="plus" aria-hidden="true" /></summary>
+                <p>{a}</p>
+              </details>
+            ))}
+          </div>
+        </section>
+
+        {/* ---------------------------------------------------------- CTA */}
+        <section className="cta wrap" data-reveal>
+          <StripeIcon name="work" size={64} />
+          <h2 className="cta-title">오늘, 다시 시작해 볼까요?</h2>
+          <p className="cta-sub">우리 동네 일자리와 배울 수 있는 과정을 지금 바로 확인해 보세요.</p>
+          <a href="#search" className="btn btn-primary btn-lg" onClick={goSearch}>내 지역 일자리 찾기</a>
+        </section>
+      </main>
+
+      <footer className="foot">
+        <Horizon />
+        <div className="foot-blue">
+          <Reflection />
+          <div className="wrap foot-in">
+            <Logo />
+            <p>자료 출처: 고용24 채용정보 · 국민내일배움카드 훈련과정 OPEN-API</p>
+            <p>공고와 과정의 최신 내용은 각 상세 페이지에서 꼭 확인해 주세요.</p>
+            <p>이 서비스는 이름·연락처 등 개인정보를 수집하거나 저장하지 않습니다.</p>
+            <p className="copy">© 2026 50+ 재취업 길잡이</p>
+          </div>
+        </div>
       </footer>
-    </main>
+    </>
   );
 }

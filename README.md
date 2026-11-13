@@ -65,6 +65,12 @@ cd ../frontend
 npm install
 npm run dev                        # http://localhost:5173  (/api → 8000 프록시)
 ```
+8000번 포트를 다른 프로그램이 쓰고 있으면 백엔드를 `--port 8010`으로 띄우고
+`API_URL=http://localhost:8010 npm run dev`로 프런트를 실행한다.
+
+블로그 글에서는 지역·직종을 미리 고른 링크로 바로 결과를 보여줄 수 있다:
+`https://도메인/?sido=대구&preset=요양보호사` 또는 `?sido=서울&keyword=급식`
+
 
 ## 3. 데이터 정제 설계
 
@@ -132,4 +138,3 @@ npm run dev                        # http://localhost:5173  (/api → 8000 프�
 - 채용정보 API 이용 자격 해결 (안 되면 다른 공개 채용 데이터 검토)
 - 제목 잘림 시 상세 API(210D01)로 전체 제목 보완
 - 시군구 선택 (근무지역 중분류 코드)
-- 블로그 글에서 직종·지역을 미리 고른 링크(`?sido=대구&preset=요양보호사`)로 바로 들어오게
