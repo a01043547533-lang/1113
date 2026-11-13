@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<HRDNet>
+  <scn_cnt>5</scn_cnt>
+  <pageNum>1</pageNum>
+  <pageSize>5</pageSize>
+  <srchList>
+    <scn_list>
+      <trprId>AIG20250001</trprId>
+      <trprDegr>3</trprDegr>
+      <title>[국민내일배움카드] 요양보호사 양성과정 (3회차)</title>
+      <subTitle>대구행복요양보호사교육원</subTitle>
+      <titleLink>/hr/a/a/1500/trainingInfo.do?trprId=AIG20250001</titleLink>
+      <address>대구광역시 달서구 월배로 100</address>
+      <telNo>053-000-0000</telNo>
+      <ncsCd>0701010101</ncsCd>
+      <traStartDate>2025-12-01</traStartDate>
+      <traEndDate>2026-02-27</traEndDate>
+      <courseMan>1,200,000</courseMan>
+      <realMan>180,000</realMan>
+      <yardMan>30</yardMan>
+      <regCourseMan>22</regCourseMan>
+      <eiEmplRate3>62.5</eiEmplRate3>
+      <eiEmplRate6>70.1</eiEmplRate6>
+      <stdgScor>4.6</stdgScor>
+      <trainTarget>국민내일배움카드(일반)</trainTarget>
+      <wkendSe>3</wkendSe>
+    </scn_list>
+    <scn_list>
+      <trprId>AIG20250001</trprId>
+      <trprDegr>4</trprDegr>
+      <title>[국민내일배움카드] 요양보호사 양성과정 (4회차)</title>
+      <subTitle>대구행복요양보호사교육원</subTitle>
+      <titleLink>/hr/a/a/1500/trainingInfo.do?trprId=AIG20250001</titleLink>
+      <address>대구광역시 달서구 월배로 100</address>
+      <ncsCd>0701010101</ncsCd>
+      <traStartDate>2026-01-05</traStartDate>
+      <traEndDate>2026-03-31</traEndDate>
+      <courseMan>1,200,000</courseMan>
+      <realMan>180,000</realMan>
+      <yardMan>30</yardMan>
+      <regCourseMan>3</regCourseMan>
+      <eiEmplRate3>62.5</eiEmplRate3>
+      <eiEmplRate6>70.1</eiEmplRate6>
+      <trainTarget>국민내일배움카드(일반)</trainTarget>
+      <wkendSe>3</wkendSe>
+    </scn_list>
+    <scn_list>
+      <trprId>AIG20250002</trprId>
+      <trprDegr>1</trprDegr>
+      <title>[K-디지털 기초역량] 50+ 컴퓨터활용능력 2급 실무</title>
+      <subTitle>대구IT아카데미</subTitle>
+      <titleLink>https://www.work24.go.kr/hr/a/a/1500/trainingInfo.do?trprId=AIG20250002</titleLink>
+      <address>대구 중구 동성로 5</address>
+      <ncsCd>2001020101</ncsCd>
+      <traStartDate>20251120</traStartDate>
+      <traEndDate>20251219</traEndDate>
+      <courseMan>500,000</courseMan>
+      <realMan>0</realMan>
+      <yardMan>20</yardMan>
+      <regCourseMan></regCourseMan>
+      <eiEmplRate3>-</eiEmplRate3>
+      <eiEmplRate6></eiEmplRate6>
+      <stdgScor></stdgScor>
+      <trainTarget>국민내일배움카드(일반)</trainTarget>
+      <wkendSe>1</wkendSe>
+    </scn_list>
+    <scn_list>
+      <trprId>AIG20250003</trprId>
+      <trprDegr>1</trprDegr>
+      <title>바리스타 2급 자격취득 과정</title>
+      <subTitle>커피학원</subTitle>
+      <titleLink></titleLink>
+      <address>경상북도 경산시 하양읍 1</address>
+      <ncsCd>1301</ncsCd>
+      <traStartDate>2025-10-01</traStartDate>
+      <traEndDate>2025-10-30</traEndDate>
+      <courseMan>400000</courseMan>
+      <realMan>-</realMan>
+      <yardMan>15</yardMan>
+      <regCourseMan>15</regCourseMan>
+      <eiEmplRate3>0.45</eiEmplRate3>
+      <eiEmplRate6>0.5</eiEmplRate6>
+      <trainTarget>국민내일배움카드(일반)</trainTarget>
+    </scn_list>
+    <scn_list>
+      <trprId>AIG20250004</trprId>
+      <trprDegr>1</trprDegr>
+      <title>데이터 깨진 과정</title>
+      <subTitle></subTitle>
+      <address>알수없는 곳 123</address>
+      <traStartDate>2026-02-01</traStartDate>
+      <traEndDate>2026-01-01</traEndDate>
+      <courseMan>100,000</courseMan>
+      <realMan>150,000</realMan>
+      <yardMan>0</yardMan>
+    </scn_list>
+  </srchList>
+</HRDNet>

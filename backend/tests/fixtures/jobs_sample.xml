@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<wantedRoot>
+  <total>6</total>
+  <startPage>1</startPage>
+  <display>6</display>
+  <wanted>
+    <wantedAuthNo>K120012511130001</wantedAuthNo>
+    <company>행복요양원</company>
+    <busino>1234567890</busino>
+    <indTpNm>노인 요양 복지시설 운영업</indTpNm>
+    <title>【중장년 환영】 요양보호사 모집 (주간/야간 선택 가능, 경력 &amp; 신입 모두 환영) 대구 달서구 성당동 인근 거주자 우대합니다...</title>
+    <salTpNm>월급</salTpNm>
+    <sal>월급 2,200,000원 이상</sal>
+    <minSal>2,200,000</minSal>
+    <maxSal></maxSal>
+    <region>대구광역시 달서구</region>
+    <holidayTpNm>주5일</holidayTpNm>
+    <minEdubg>학력무관</minEdubg>
+    <maxEdubg></maxEdubg>
+    <career>관계없음</career>
+    <regDt>25-11-12</regDt>
+    <closeDt>25-12-31</closeDt>
+    <infoSvc>VALIDATION</infoSvc>
+    <wantedInfoUrl>https://www.work24.go.kr/wk/a/b/1200/empInfoSrch.do?wantedAuthNo=K120012511130001</wantedInfoUrl>
+    <basicAddr>대구광역시 달서구 성당로 10</basicAddr>
+    <detailAddr> 2층 </detailAddr>
+    <empTpCd>10</empTpCd>
+    <jobsCd>550101</jobsCd>
+  </wanted>
+  <wanted>
+    <wantedAuthNo>K120012511130002</wantedAuthNo>
+    <company>(주)클린서비스</company>
+    <indTpNm>건물 일반 청소업</indTpNm>
+    <title>건물 미화원 (연령무관, 시간선택제)</title>
+    <salTpNm>시급</salTpNm>
+    <sal>시급 10,030원</sal>
+    <minSal>10030</minSal>
+    <maxSal>0</maxSal>
+    <region>대구 북구,대구 동구</region>
+    <holidayTpNm>주6일</holidayTpNm>
+    <minEdubg>고졸이하</minEdubg>
+    <career>신입</career>
+    <regDt>2025-11-10</regDt>
+    <closeDt>채용시까지</closeDt>
+    <infoSvc>VALIDATION</infoSvc>
+    <wantedInfoUrl>https://www.work24.go.kr/wk/x?no=2</wantedInfoUrl>
+    <empTpCd>11</empTpCd>
+    <jobsCd>561201</jobsCd>
+  </wanted>
+  <wanted>
+    <wantedAuthNo>K120012511130003</wantedAuthNo>
+    <company>대구물류센터</company>
+    <indTpNm>창고업</indTpNm>
+    <title>1톤 배송기사 (경력 3년이상)</title>
+    <salTpNm>연봉</salTpNm>
+    <sal>연봉 3,000만원 ~ 3,600만원</sal>
+    <minSal></minSal>
+    <maxSal></maxSal>
+    <region>경북 경산시</region>
+    <holidayTpNm>주5일</holidayTpNm>
+    <minEdubg>대졸(2~3년)이상</minEdubg>
+    <career>경력 3년이상</career>
+    <regDt>25-11-01</regDt>
+    <closeDt>25-11-05</closeDt>
+    <infoSvc>VALIDATION</infoSvc>
+    <wantedInfoUrl>https://www.work24.go.kr/wk/x?no=3</wantedInfoUrl>
+    <empTpCd>20</empTpCd>
+    <jobsCd>873101</jobsCd>
+  </wanted>
+  <wanted>
+    <wantedAuthNo>K120012511130004</wantedAuthNo>
+    <company>청년스타트업</company>
+    <indTpNm>소프트웨어 개발</indTpNm>
+    <title>청년 신입공채 마케팅 인턴</title>
+    <salTpNm></salTpNm>
+    <sal>면접후 결정</sal>
+    <minSal>0</minSal>
+    <maxSal>0</maxSal>
+    <region>서울특별시 강남구</region>
+    <holidayTpNm>주5일</holidayTpNm>
+    <minEdubg>대졸(4년)</minEdubg>
+    <career>신입/경력 1년 ~ 3년</career>
+    <regDt>25-11-13</regDt>
+    <closeDt></closeDt>
+    <infoSvc>VALIDATION</infoSvc>
+    <wantedInfoUrl>https://www.work24.go.kr/wk/x?no=4</wantedInfoUrl>
+    <empTpCd>20</empTpCd>
+  </wanted>
+  <wanted>
+    <wantedAuthNo>K120012511130005</wantedAuthNo>
+    <company>행복요양원</company>
+    <indTpNm>노인 요양 복지시설 운영업</indTpNm>
+    <title>【중장년 환영】 요양보호사 모집 (주간/야간 선택 가능, 경력 &amp; 신입 모두 환영) 대구 달서구 성당동 인근 거주자 우대합니다...</title>
+    <salTpNm>월급</salTpNm>
+    <sal>월급 2,200,000원 이상</sal>
+    <minSal>2200000</minSal>
+    <region>대구 달성군</region>
+    <minEdubg>학력무관</minEdubg>
+    <career>관계없음</career>
+    <regDt>25-11-12</regDt>
+    <closeDt>25-12-31</closeDt>
+    <empTpCd>10</empTpCd>
+  </wanted>
+  <wanted>
+    <wantedAuthNo>K120012511130006</wantedAuthNo>
+    <company>이상한데이터</company>
+    <title>급여 오기재 사례</title>
+    <salTpNm>월급</salTpNm>
+    <sal>월급 10,030원</sal>
+    <minSal>10030</minSal>
+    <region>전국</region>
+    <minEdubg></minEdubg>
+    <career></career>
+    <regDt>25/11/13</regDt>
+    <closeDt>2025.12.01 18:00</closeDt>
+    <empTpCd>99</empTpCd>
+  </wanted>
+</wantedRoot>
