@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Arrow, HeroArt, Icon, Logo, PreviewCard, SIGNS } from "./art.jsx";
+import { Arrow, HeroTiles, Icon, Logo, SIGNS } from "./art.jsx";
 import Footer, { useStatus } from "./footer.jsx";
 import { AlbaTab, ExamTab, JobsTab, TrainingTab } from "./sections.jsx";
 
@@ -7,6 +7,20 @@ const FALLBACK_SIDO = ["서울", "부산", "대구", "인천", "광주", "대전
   "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
 const FALLBACK_PRESETS = ["조리·제과제빵", "운전·중장비", "전기·설비·시설관리", "건축·인테리어", "조경·농업·산림",
   "용접·기계·자동차", "미용", "요양·돌봄", "경비·청소", "사무·부동산·상담"];
+
+// 관심 분야 카드: 아이콘과 대표 자격·일자리(실제 데이터에서 많이 나온 것)
+const FIELDS = {
+  "조리·제과제빵": ["cook", "한식조리기능사 · 제빵기능사 · 급식 조리원"],
+  "운전·중장비": ["truck", "지게차 · 굴착기 · 승합차 운전원"],
+  "전기·설비·시설관리": ["bolt", "전기기능사 · 위험물기능사 · 건물 관리원"],
+  "건축·인테리어": ["home", "도배 · 실내건축 · 건축도장"],
+  "조경·농업·산림": ["leaf", "조경기능사 · 산림기능사 · 화훼장식"],
+  "용접·기계·자동차": ["wrench", "용접 · 자동차정비 · 생산직"],
+  "미용": ["scissors", "미용사(일반) · 네일 · 피부"],
+  "요양·돌봄": ["heart", "요양보호사 · 간병 · 아이돌봄"],
+  "경비·청소": ["shield", "경비지도사 · 아파트 미화원 · 건물 청소"],
+  "사무·부동산·상담": ["brief", "공인중개사 · 주택관리사보 · 직업상담사"],
+};
 
 const FAQ = [
   ["무료인가요?", "네. 회원가입 없이 무료로 씁니다."],
@@ -28,22 +42,22 @@ const TABS = [
   ["alba", "알바", "sun"],
 ];
 
-// 아래 '세 가지' 카드: 각 카드 안의 작은 화면 조각은 실제 결과 화면에 나오는 모양 그대로
-const THREE = [
+// 어두운 띠의 세 줄. 오른쪽 작은 화면 조각은 실제 결과 화면에 나오는 내용 그대로.
+const STEPS = [
   {
-    tab: "trainings", tone: "sky", step: "배우고", title: "국비 교육",
-    text: "3개월 안에 시작하는 내일배움카드 과정을 개강이 가까운 순으로 봅니다.",
-    chips: [["book", "한식조리기능사 실기 · 11월 16일 개강"], ["won", "훈련비 554,800원"]],
+    tab: "trainings", step: "배우고", title: "내일배움카드로 들을 수 있는 과정부터",
+    text: "3개월 안에 시작하는 국비 과정을 만족도와 개강일 순서로 보여 줍니다. 훈련비와 장소, 기간을 한 장에서 비교하세요.",
+    ui: { head: "대구 · 국비 교육 31개", rows: [["book", "한식조리기능사 실기 (단기속성반)", "11월 16일 개강"], ["won", "훈련비 554,800원", "만족도 99점"], ["pin", "대구 달서구", "3주 · 주중"]] },
   },
   {
-    tab: "exams", tone: "leaf", step: "취득하고", title: "자격증 시험",
-    text: "우리 지역에서 많이 응시한 자격증과 다음 시험 날짜, 응시료, 시험장을 봅니다.",
-    chips: [["cal", "실기 원서접수 · 마감까지 2일"], ["pin", "대구 상설 시험장 25곳"]],
+    tab: "exams", step: "취득하고", title: "우리 지역에서 많이 따는 자격증과 다음 시험",
+    text: "지역별 응시자 순위를 보고, 누르면 다음 접수일까지 남은 날, 응시료, 가까운 상설 시험장이 바로 나옵니다.",
+    ui: { head: "대구 · 조리·제과제빵 1위", rows: [["cert", "한식조리기능사", "540명 응시"], ["cal", "실기 원서접수", "마감까지 2일"], ["won", "응시료", "필기 14,500 · 실기 26,900원"]] },
   },
   {
-    tab: "jobs", tone: "sun", step: "다시 일하기", title: "채용 · 알바",
-    text: "지금 접수 중인 중장년 공고와 고용센터 현장면접, 알바 사이트 검색을 한 곳에서 엽니다.",
-    chips: [["work", "아파트 미화원 · 50세 이상 우대"], ["cal", "현장면접 · 11월 26일 14:00"]],
+    tab: "jobs", step: "다시 일하기", title: "지금 접수 중인 중장년 공고와 현장면접",
+    text: "50세 이상 우대 공고를 위로 올려 보여 주고, 고용센터 현장면접 날짜와 장소, 알바 사이트 검색까지 한 번에 엽니다.",
+    ui: { head: "부산 · 경비·청소 17건", rows: [["work", "병원건물 청소원 · 연산역", "50세 이상 우대"], ["work", "더샵신문그리니티 미화원", "마감까지 5일"], ["work", "서면아이파크 커뮤니티 미화원", "마감까지 19일"]] },
   },
 ];
 
@@ -121,7 +135,12 @@ export default function App() {
     else toSearch();
   }
 
-  const goal = SIGNS.find((s) => s.tab === tab) || SIGNS.find((s) => s.tab === "jobs");
+  function pickField(p) {
+    setPreset(p);
+    toSearch();
+  }
+
+  const goal = SIGNS.find((s) => s.tab === tab) || SIGNS[2];
 
   return (
     <>
@@ -131,37 +150,37 @@ export default function App() {
         <div className="wrap nav-in">
           <a href="/" className="nav-logo" aria-label="50+ 재취업 길잡이 처음 화면"><Logo /></a>
           <nav className="nav-links" aria-label="주요 메뉴">
-            <a href="#three">무엇을 볼 수 있나요</a>
+            <button type="button" onClick={() => openArea("trainings")}>국비 교육</button>
+            <button type="button" onClick={() => openArea("exams")}>자격증 시험</button>
+            <button type="button" onClick={() => openArea("jobs")}>채용 · 알바</button>
             <a href="#faq">자주 묻는 질문</a>
           </nav>
-          <button type="button" className="pill-btn dark sm" onClick={toSearch}>바로 찾기</button>
+          <button type="button" className="btn-x dark sm" onClick={toSearch}>바로 찾기</button>
         </div>
       </header>
 
       <main>
         <section className="hero">
           <div className="wrap hero-copy">
-            <h1 className="hero-title">배우고, 취득하고,<br />다시 일하기.</h1>
+            <h1 className="hero-title">배우고, 취득하고, 다시 일하기</h1>
             <p className="hero-sub">
-              사는 곳과 관심 분야를 고르면 국비 교육, 자격증 시험, 중장년 채용공고를 한 화면에서 볼 수 있어요.
+              사는 곳과 관심 분야만 고르면 국비 교육 과정, 자격증 시험 일정, 지금 접수 중인 중장년 채용공고를 한 화면에서 볼 수 있습니다.
             </p>
             <div className="hero-cta">
-              <button type="button" className="pill-btn dark lg" onClick={toSearch}>내 조건으로 찾기 <Arrow size={20} /></button>
-              <span className="hero-note">무료 · 회원가입 없음 · 개인정보 저장 안 함</span>
+              <button type="button" className="btn-x dark lg" onClick={toSearch}>내 조건으로 찾기</button>
+              <button type="button" className="btn-x line lg" onClick={() => openArea("exams")}>자격증 순위 보기</button>
             </div>
           </div>
-          <div className="wrap">
-            <HeroArt>
-              <PreviewCard onOpen={() => openArea("exams")} />
-            </HeroArt>
-          </div>
+          <HeroTiles onOpen={openArea} />
+          <p className="wrap tiles-cap">대구 · 조리·제과제빵으로 찾은 예시와 전국 공고 수입니다. 카드를 누르면 그 내용부터 열립니다.</p>
         </section>
 
         <section className="finder" id="search" ref={searchRef} aria-labelledby="finder-title">
-          <div className="wrap">
-            <div className="section-head">
+          <div className="wrap finder-in">
+            <div className="finder-intro">
+              <p className="kicker">2단계면 끝</p>
               <h2 id="finder-title">내 조건으로 찾기</h2>
-              <p>두 가지만 고르면 됩니다.</p>
+              <p>사는 곳과 관심 분야를 고르고 ‘결과 보기’를 누르세요. 회원가입도, 개인정보 입력도 없습니다.</p>
             </div>
             <form className="board" onSubmit={search}>
               <div className="field">
@@ -193,7 +212,7 @@ export default function App() {
               </fieldset>
 
               <div className="board-foot">
-                <button className="pill-btn dark lg" disabled={loading}>
+                <button className="btn-x dark lg" disabled={loading}>
                   {loading ? <><span className="spin" aria-hidden="true" />찾는 중…</> : <>결과 보기 <Arrow size={20} /></>}
                 </button>
                 <span className="board-goal"><i className={`d-${goal.tone}`} aria-hidden="true" />{goal.label}부터 보여 줍니다</span>
@@ -243,26 +262,58 @@ export default function App() {
           )}
         </div>
 
-        <section className="three" id="three" aria-labelledby="three-title">
+        <section className="band" id="three" aria-labelledby="band-title">
+          <span className="band-curve" aria-hidden="true" />
           <div className="wrap">
-            <div className="section-head">
-              <h2 id="three-title">한 번 고르면 세 가지를 같이 봅니다</h2>
-              <p>카드를 누르면 그 내용부터 열립니다.</p>
-            </div>
-            <div className="three-grid">
-              {THREE.map((c) => (
-                <button key={c.tab} type="button" className={`three-card t-${c.tone}`} onClick={() => openArea(c.tab)}>
-                  <span className="three-step"><i className={`d-${c.tone}`} />{c.step}</span>
-                  <span className="three-title">{c.title}</span>
-                  <span className="three-text">{c.text}</span>
-                  <span className="three-ui" aria-hidden="true">
-                    {c.chips.map(([icon, t]) => (
-                      <span key={t} className="ui-chip"><Icon name={icon} size={16} />{t}</span>
-                    ))}
-                  </span>
-                  <span className="three-go">열기 <Arrow size={18} /></span>
-                </button>
+            <h2 id="band-title" className="band-title">한 번 고르면 세 가지를 같이 봅니다</h2>
+            <div className="steps">
+              {STEPS.map((s, i) => (
+                <article key={s.tab} className={"step-row" + (i % 2 ? " flip" : "")}>
+                  <div className="step-copy">
+                    <p className="kicker mint">{s.step}</p>
+                    <h3>{s.title}</h3>
+                    <p>{s.text}</p>
+                    <button type="button" className="btn-x mint" onClick={() => openArea(s.tab)}>
+                      {SIGNS.find((g) => g.tab === s.tab).label} 열기 <Arrow size={18} />
+                    </button>
+                  </div>
+                  <div className="step-visual" aria-hidden="true">
+                    <span className="frame-bar" />
+                    <div className="mock">
+                      <p className="mock-head"><i className="d-sky" />{s.ui.head}</p>
+                      {s.ui.rows.map(([icon, a, b]) => (
+                        <div key={a} className="mock-row">
+                          <span className="mock-icon"><Icon name={icon} size={18} /></span>
+                          <span className="mock-a">{a}</span>
+                          <span className="mock-b">{b}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </article>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="fields" aria-labelledby="fields-title">
+          <div className="wrap fields-in">
+            <div className="fields-intro">
+              <h2 id="fields-title">어떤 일을 찾으세요?</h2>
+              <p>분야를 누르면 그 분야로 골라 둔 채 조건 고르기로 이동합니다.</p>
+              <button type="button" className="btn-x dark" onClick={toSearch}>내 조건으로 찾기</button>
+            </div>
+            <div className="field-grid">
+              {meta.presets.map((p) => {
+                const [icon, ex] = FIELDS[p] || ["work", ""];
+                return (
+                  <button key={p} type="button" className={"field-card" + (preset === p ? " on" : "")} onClick={() => pickField(p)}>
+                    <span className="fc-icon"><Icon name={icon} size={20} /></span>
+                    <span className="fc-name">{p}</span>
+                    <span className="fc-ex">{ex}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
         </section>
@@ -277,6 +328,16 @@ export default function App() {
                   <p>{a}</p>
                 </details>
               ))}
+            </div>
+          </div>
+        </section>
+
+        <section className="cta" aria-labelledby="cta-title">
+          <div className="wrap cta-in">
+            <h2 id="cta-title">우리 동네에서 배우고, 취득하고,<br />다시 일할 곳을 찾아보세요</h2>
+            <div className="cta-btns">
+              <button type="button" className="btn-x mint lg" onClick={toSearch}>내 조건으로 찾기</button>
+              <a className="btn-x ghost lg" href="#faq">자주 묻는 질문</a>
             </div>
           </div>
         </section>

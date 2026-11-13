@@ -1,10 +1,10 @@
-// 히어로 그림과 아이콘. 그림은 왼쪽에서 오른쪽으로 올라가는 계단(배우고 → 취득하고 → 다시 일하기)을
-// 하늘색·풀색·해바라기색 기둥으로 그리고, 가운데에 실제 데이터로 만든 예시 화면 카드를 띄운다.
+// 아이콘, 로고, 히어로 카드 줄.
+// 히어로 카드 줄은 사진 대신 실제로 받은 데이터(2026-11-13, 대구·조리·제과제빵 예시와 전국 공고 수)를 담는다.
 
 export const SIGNS = [
-  { tab: "trainings", word: "배우고", label: "국비 교육", sub: "내일배움카드 과정", tone: "sky" },
-  { tab: "exams", word: "취득하고", label: "자격증 시험", sub: "일정 · 응시료 · 시험장", tone: "leaf" },
-  { tab: "jobs", word: "다시 일하기", label: "채용 · 알바", sub: "중장년 공고 · 현장면접", tone: "sun" },
+  { tab: "trainings", word: "배우고", label: "국비 교육", tone: "sky" },
+  { tab: "exams", word: "취득하고", label: "자격증 시험", tone: "leaf" },
+  { tab: "jobs", word: "다시 일하기", label: "채용 · 알바", tone: "sun" },
 ];
 
 const I = {
@@ -14,6 +14,19 @@ const I = {
   pin: <><path d="M12 21s-6.5-6-6.5-11a6.5 6.5 0 0 1 13 0c0 5-6.5 11-6.5 11Z" /><circle cx="12" cy="10" r="2.3" /></>,
   book: <path d="M4 6.5c3-1.4 5.7-1.2 8 .6v12c-2.3-1.8-5-2-8-.6v-12Zm16 0c-3-1.4-5.7-1.2-8 .6v12c2.3-1.8 5-2 8-.6v-12Z" />,
   work: <><rect x="3.5" y="7.5" width="17" height="12" rx="2.5" /><path d="M9 7.5V5.8A1.8 1.8 0 0 1 10.8 4h2.4A1.8 1.8 0 0 1 15 5.8v1.7M3.5 12.5h17" /></>,
+  won: <path d="M4 8h16M4 12h16M6 5l3 13 3-10 3 10 3-13" />,
+  cert: <><rect x="4" y="4" width="16" height="12" rx="2.5" /><path d="M8 8.5h8M8 11.5h5" /><path d="M15 15.5v5l2-1.2 2 1.2v-5" /></>,
+  // 관심 분야
+  cook: <><path d="M6 11h12v6a3 3 0 0 1-3 3H9a3 3 0 0 1-3-3v-6Z" /><path d="M4 11h16M9 4.5c0 1.5 1 1.5 1 3M13 4.5c0 1.5 1 1.5 1 3" /></>,
+  truck: <><path d="M3 6.5h11v9H3zM14 9.5h4l3 3v3h-7z" /><circle cx="7" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></>,
+  bolt: <path d="M13 3 5 13.5h6L10 21l8-10.5h-6L13 3Z" />,
+  home: <><path d="M4 11 12 4l8 7" /><path d="M6 9.5V20h12V9.5M10 20v-5h4v5" /></>,
+  leaf: <><path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14" /><path d="M5 19c3-4 6-6.5 9-8" /></>,
+  wrench: <path d="M14.5 5.5a4 4 0 0 0 4.9 4.9l-9 9a2.1 2.1 0 0 1-3-3l9-9a4 4 0 0 0-1.9-1.9Z" />,
+  scissors: <><circle cx="6.5" cy="7" r="2.5" /><circle cx="6.5" cy="17" r="2.5" /><path d="M8.6 8.4 20 17M8.6 15.6 20 7" /></>,
+  heart: <path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z" />,
+  shield: <path d="M12 3.5 5 6.5v5.5c0 4.3 3 7.6 7 8.5 4-.9 7-4.2 7-8.5V6.5l-7-3Z" />,
+  brief: <><rect x="4" y="5" width="16" height="15" rx="2.5" /><path d="M8 9.5h8M8 13h8M8 16.5h5" /></>,
 };
 
 export function Icon({ name, size = 18 }) {
@@ -38,66 +51,37 @@ export function Logo() {
   );
 }
 
-// 계단 기둥. 각 기둥은 위가 둥근 면(진한 색)과 몸통(옅은 색)으로 이루어진다. 오른쪽으로 갈수록 높아진다.
-const PILLARS = [
-  { x: 0, w: 15, h: 46, tone: "sky", cap: "diamond" },
-  { x: 11, w: 13, h: 30, tone: "sun", cap: "oval" },
-  { x: 20, w: 12, h: 54, tone: "leaf", cap: "dome" },
-  { x: 30, w: 14, h: 26, tone: "sky", cap: "oval" },
-  { x: 56, w: 14, h: 42, tone: "sun", cap: "oval" },
-  { x: 66, w: 13, h: 70, tone: "leaf", cap: "dome" },
-  { x: 77, w: 13, h: 56, tone: "sun", cap: "oval" },
-  { x: 86, w: 14, h: 82, tone: "sky", cap: "diamond" },
+// 히어로 아래 카드 줄 (높이를 엇갈리게)
+const TILES = [
+  { tab: "trainings", kind: "dark", h: 72, icon: "book", label: "국비 교육", big: "31", unit: "개 과정", sub: "대구 · 3개월 안에 시작" },
+  { tab: "exams", kind: "light", h: 86, icon: "cert", label: "한식조리기능사", big: "14,500", unit: "원", sub: "필기 응시료 · 실기 26,900원", chip: "상시 시험" },
+  { tab: "jobs", kind: "mint", h: 60, icon: "cal", label: "현장 채용행사", big: "11.17", unit: "", sub: "제3차 달성군 취업박람회 · 14:00" },
+  { tab: "jobs", kind: "dark", h: 96, icon: "work", label: "중장년 채용공고", big: "259", unit: "건", sub: "전국 지금 접수 중 · 50세 이상 우대 포함" },
+  { tab: "exams", kind: "light", h: 74, icon: "pin", label: "대구 상설 시험장", big: "25", unit: "곳", sub: "디지털시험센터 포함" },
 ];
 
-export function HeroArt({ children }) {
+export function HeroTiles({ onOpen }) {
   return (
-    <div className="art">
-      <div className="art-field" aria-hidden="true">
-        {PILLARS.map((p, i) => (
-          <span
+    <div className="tiles-wrap">
+      <div className="tiles">
+        {TILES.map((t, i) => (
+          <button
             key={i}
-            className={`pillar t-${p.tone} cap-${p.cap}`}
-            style={{ "--x": `${p.x}%`, "--w": `${p.w}%`, "--h": `${p.h}%`, "--i": i }}
-          />
+            type="button"
+            className={`tile tile-${t.kind}`}
+            style={{ "--h": t.h, "--i": i }}
+            onClick={() => onOpen(t.tab)}
+          >
+            <span className="tile-top">
+              <span className="tile-icon"><Icon name={t.icon} size={20} /></span>
+              <span className="tile-label">{t.label}</span>
+            </span>
+            <span className="tile-num">{t.big}<small>{t.unit}</small></span>
+            <span className="tile-sub">{t.sub}</span>
+            {t.chip && <span className="tile-chip">{t.chip}</span>}
+          </button>
         ))}
-        <span className="grain" />
       </div>
-      {children}
-    </div>
-  );
-}
-
-// 히어로 가운데 카드: 실제로 받은 데이터(2026-11-13, 대구·한식조리기능사)로 만든 예시
-export function PreviewCard({ onOpen }) {
-  return (
-    <div className="preview">
-      <span className="preview-back b2" aria-hidden="true" />
-      <span className="preview-back b1" aria-hidden="true" />
-      <button type="button" className="preview-card" onClick={onOpen} aria-label="예시 화면. 누르면 내 조건으로 찾기로 이동">
-        <span className="pv-top">
-          <span className="pv-app t-leaf"><Icon name="cal" size={22} /></span>
-          <span className="pv-meta">
-            <strong>자격증 시험</strong>
-            <span>대구 · 2025년 540명 응시</span>
-          </span>
-          <span className="pv-tag">예시</span>
-        </span>
-        <span className="pv-title">한식조리기능사 실기 원서접수</span>
-        <span className="pv-text">
-          상시 시험이라 거의 매주 있어요. 응시료는 필기 14,500원, 실기 26,900원이고 대구에 상설 시험장이 25곳 있습니다.
-        </span>
-        <span className="pv-chips">
-          <span className="pv-chip"><i className="d-leaf" />상시 시험</span>
-          <span className="pv-chip"><Icon name="cal" size={15} />마감까지 2일</span>
-        </span>
-        <span className="pv-actions">
-          <span className="pv-btn ok"><Icon name="check" size={16} />시험 일정</span>
-          <span className="pv-btn"><Icon name="book" size={16} />국비 과정 <em>14</em></span>
-          <span className="pv-btn"><Icon name="pin" size={16} />시험장 <em>25</em></span>
-          <span className="pv-btn go">내 조건으로 보기 <Arrow size={16} /></span>
-        </span>
-      </button>
     </div>
   );
 }
