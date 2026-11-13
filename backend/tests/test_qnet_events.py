@@ -153,3 +153,27 @@ def test_gwangju_jeonnam_same_area():
     assert not same_area("광주", "전북") and not same_area("대구", None)
     rows = [{"examAreaGbNm": "국가자격시험장(구공단상설)", "examAreaNm": "광주 상설시험장", "address": "전남광주통합특별시 서구 상무대로 1"}]
     assert len(clean_venues(rows, "광주")) == 1      # 통합 이름 주소도 광주 시험장으로
+
+
+def test_qnet_retries_transient_error(monkeypatch):
+    import asyncio
+    import httpx
+    from app.clients import qnet
+    calls = {"n": 0}
+    bad = "<response><header><resultCode>99</resultCode><resultMsg>Closed Connection</resultMsg></header></response>"
+    good = "<response><header><resultCode>00</resultCode></header><body><items><item><jmcd>1</jmcd></item></items></body></response>"
+
+    class FakeClient:
+        def __init__(self, *a, **k): pass
+        async def __aenter__(self): return self
+        async def __aexit__(self, *a): return False
+        async def get(self, url, params=None):
+            calls["n"] += 1
+            return httpx.Response(200, text=bad if calls["n"] == 1 else good)
+
+    monkeypatch.setattr(qnet.httpx, "AsyncClient", FakeClient)
+    real_sleep = asyncio.sleep
+    monkeypatch.setattr(qnet.asyncio, "sleep", lambda s: real_sleep(0))
+    qnet._cache._store.clear()
+    items = asyncio.run(qnet.get_items("RetryTest/getList", x=1))
+    assert items == [{"jmcd": "1"}] and calls["n"] == 2

@@ -10,6 +10,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import xml.etree.ElementTree as ET
 from typing import Any
 
@@ -49,8 +50,15 @@ async def _get(path: str, cache: _TTLCache, **params: Any) -> tuple[int, list[di
     hit = cache.get(ck)
     if hit is not None:
         return hit
-    async with httpx.AsyncClient(timeout=get_settings().HTTP_TIMEOUT + 15) as client:
-        r = await client.get(f"{BASE}/{path}", params={"serviceKey": key, **params})
+    for attempt in range(2):   # 연결이 끊기면 한 번 더 시도
+        try:
+            async with httpx.AsyncClient(timeout=get_settings().HTTP_TIMEOUT + 15) as client:
+                r = await client.get(f"{BASE}/{path}", params={"serviceKey": key, **params})
+            break
+        except httpx.HTTPError:
+            if attempt == 1:
+                raise
+            await asyncio.sleep(0.8)
     text = r.text.strip()
     if not text.startswith("<"):
         raise SenuriError(f"HTTP {r.status_code}: {text[:200]}")

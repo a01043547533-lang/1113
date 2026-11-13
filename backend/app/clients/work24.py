@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import time
 import xml.etree.ElementTree as ET
 from typing import Any
@@ -52,8 +53,15 @@ async def _get_xml(url: str, params: dict[str, Any]) -> ET.Element:
     if cached is not None:
         return cached
     s = get_settings()
-    async with httpx.AsyncClient(timeout=s.HTTP_TIMEOUT) as client:
-        r = await client.get(url, params=params)
+    for attempt in range(2):   # 연결이 끊기면 한 번 더 시도
+        try:
+            async with httpx.AsyncClient(timeout=s.HTTP_TIMEOUT) as client:
+                r = await client.get(url, params=params)
+            break
+        except httpx.HTTPError:
+            if attempt == 1:
+                raise
+            await asyncio.sleep(0.8)
     if r.status_code != 200:
         raise Work24Error(f"HTTP {r.status_code} from {url}")
     text = r.text.strip()

@@ -11,6 +11,7 @@
 """
 from __future__ import annotations
 
+import asyncio
 import xml.etree.ElementTree as ET
 from typing import Any
 
@@ -48,17 +49,30 @@ async def get_items(path: str, **params: Any) -> list[dict[str, str]]:
     if hit is not None:
         return hit
     s = get_settings()
-    async with httpx.AsyncClient(timeout=s.HTTP_TIMEOUT) as client:
-        r = await client.get(f"{QNET}/{path}", params=_params(params))
-    if r.status_code != 200:
-        raise QnetError(f"HTTP {r.status_code} from {path}")
-    text = r.text.strip()
-    if not text.startswith("<"):
-        raise QnetError(f"Non-XML response: {text[:200]}")
-    try:
-        items = parse_items(ET.fromstring(text))
-    except ET.ParseError as e:
-        raise QnetError(f"XML parse error: {e}") from e
+    # Q-Net은 가끔 '오류 99: Closed Connection'이나 연결 끊김을 낸다(2026-11-13 배포 서버에서 확인).
+    # 다시 부르면 대부분 바로 정상이라 잠깐 쉬고 최대 3번까지 시도한다.
+    last: Exception | None = None
+    for attempt in range(3):
+        try:
+            async with httpx.AsyncClient(timeout=s.HTTP_TIMEOUT) as client:
+                r = await client.get(f"{QNET}/{path}", params=_params(params))
+            if r.status_code != 200:
+                raise QnetError(f"HTTP {r.status_code} from {path}")
+            text = r.text.strip()
+            if not text.startswith("<"):
+                raise QnetError(f"Non-XML response: {text[:200]}")
+            try:
+                items = parse_items(ET.fromstring(text))
+            except ET.ParseError as e:
+                raise QnetError(f"XML parse error: {e}") from e
+            break
+        except (QnetError, httpx.HTTPError) as e:
+            last = e
+            if attempt == 2:
+                raise
+            await asyncio.sleep(0.6 * (attempt + 1))
+    else:  # pragma: no cover
+        raise last or QnetError("unknown")
     _cache.set(key, items)
     if path.startswith("InquiryTestInformationNTQSVC"):
         freshness.mark("qnet_schedule")
