@@ -1,0 +1,128 @@
+/* 결과 탭 (자격증·교육·취업·알바). 색·간격 토큰은 styles.css 의 :root 를 쓴다. */
+.btn-md { padding: 14px 22px; font-size: 18px; min-height: 54px; margin-top: 8px; }
+.spin.dark { border-color: rgba(33, 60, 255, .2); border-top-color: var(--accent); display: inline-block; vertical-align: -3px; margin-right: 10px; }
+.muted { color: var(--ink-3); }
+
+.tabs {
+  position: sticky; top: 68px; z-index: 20; display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;
+  padding: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow);
+}
+.tab {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 56px; padding: 8px 10px;
+  border: 0; border-radius: 12px; background: transparent; cursor: pointer; font-size: 19px; font-weight: 700; color: var(--ink-3);
+}
+.tab:hover { color: var(--ink); background: var(--bg); }
+.tab.on { background: var(--accent); color: #fff; }
+.tab-count { font-size: 15px; font-weight: 700; min-width: 26px; padding: 1px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.tab.on .tab-count { background: rgba(255, 255, 255, .22); color: #fff; }
+.tab-panel { padding-top: 28px; }
+.tab-title { font-size: 24px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.35; margin: 8px 0 6px; }
+.tab-panel > div > .tab-title:not(:first-child) { margin-top: 48px; }
+.tab-note { color: var(--ink-3); font-size: 16px; margin-bottom: 20px; max-width: 46em; }
+.hint { color: var(--ink-3); font-size: 15px; margin: 6px 0 10px; }
+.count { font-size: 16px; font-weight: 700; color: var(--accent); margin-left: 4px; }
+.pillsm { display: inline-block; font-size: 13px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); margin-left: 8px; vertical-align: 2px; }
+.pillsm.warn { background: var(--warn-bg); color: var(--warn-ink); }
+@media (max-width: 640px) {
+  .tabs { top: 62px; gap: 4px; padding: 4px; border-radius: 14px; }
+  .tab { flex-direction: column; gap: 2px; min-height: 60px; font-size: 16px; padding: 6px 2px; }
+  .tab-count { font-size: 13px; padding: 0 7px; }
+  .tab-title { font-size: 21px; }
+}
+
+/* 자격증 순위 */
+.rank { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.rank > li { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow); overflow: hidden; }
+.rank > li.open { border-color: var(--accent); }
+.rank-btn {
+  width: 100%; display: grid; grid-template-columns: 44px 1fr auto 24px; align-items: center; gap: 16px;
+  padding: 18px 20px; background: none; border: 0; cursor: pointer; text-align: left;
+}
+.rank.plain .rank-btn { grid-template-columns: 1fr auto 24px; }
+.rank-btn:disabled { cursor: default; }
+.rank-btn:hover:not(:disabled) { background: var(--bg); }
+.rank-no { display: grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); font-size: 20px; font-weight: 800; }
+.rank > li:nth-child(-n+3) .rank-no { background: var(--accent); color: #fff; }
+.rank-main { display: grid; gap: 8px; min-width: 0; }
+.rank-name { font-size: 20px; font-weight: 700; letter-spacing: -0.02em; }
+.bar { display: block; height: 6px; border-radius: 3px; background: var(--line); overflow: hidden; }
+.bar > span { display: block; height: 100%; background: var(--accent); border-radius: 3px; }
+.rank-count { font-size: 17px; font-weight: 700; color: var(--ink-2); white-space: nowrap; }
+.chev { width: 12px; height: 12px; border-right: 2.5px solid var(--ink-3); border-bottom: 2.5px solid var(--ink-3); transform: rotate(45deg) translate(-3px, -3px); transition: transform .2s; justify-self: center; }
+li.open .chev { transform: rotate(-135deg) translate(-3px, -3px); }
+@media (max-width: 640px) {
+  .rank-btn { grid-template-columns: 38px 1fr 20px; gap: 4px 12px; padding: 16px; }
+  .rank.plain .rank-btn { grid-template-columns: 1fr 20px; }
+  .rank-no { width: 38px; height: 38px; font-size: 18px; grid-row: span 2; }
+  .rank-count { grid-column: 2; grid-row: 2; font-size: 15px; }
+  .rank.plain .rank-count { grid-column: 1; }
+  .chev { grid-column: 3; grid-row: 1 / span 2; }
+  .rank.plain .chev { grid-column: 2; }
+  .rank-name { font-size: 18px; }
+}
+
+/* 자격증 상세 */
+.detail { padding: 4px 20px 22px; border-top: 1px solid var(--line); display: grid; gap: 14px; background: #fcfcfd; }
+.detail.loading { padding: 22px 20px; color: var(--ink-3); display: block; }
+.detail-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 14px; margin-top: 16px; }
+@media (max-width: 760px) { .detail-grid { grid-template-columns: 1fr; } .detail { padding: 4px 14px 18px; } }
+.box { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+.box h4 { margin: 0 0 8px; font-size: 18px; font-weight: 800; letter-spacing: -0.02em; }
+.rounds { list-style: none; padding: 0; margin: 8px 0 0; display: grid; gap: 12px; }
+.rounds li { display: grid; grid-template-columns: auto 1fr; gap: 12px; align-items: start; }
+.tag { display: inline-block; font-size: 14px; font-weight: 800; padding: 4px 10px; border-radius: 8px; white-space: nowrap; background: var(--accent-soft); color: var(--accent); }
+.tag.ongoing { background: #fff1e6; color: #b42318; }
+.rounds strong { font-size: 18px; }
+.fee { margin: 4px 0 0; display: grid; gap: 6px; }
+.fee .row dd { font-size: 19px; font-weight: 700; }
+.venues, .mini { list-style: none; padding: 0; margin: 10px 0 0; display: grid; gap: 12px; }
+.venues li, .mini li { padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.venues li:last-child, .mini li:last-child { border-bottom: 0; padding-bottom: 0; }
+.venues strong { font-size: 17px; }
+.mini a { font-weight: 700; color: var(--accent); text-decoration: none; font-size: 17px; }
+.mini a:hover { text-decoration: underline; text-underline-offset: 3px; }
+.ext { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 12px; padding: 18px 20px; background: var(--surface); border: 1px dashed var(--line-2); border-radius: var(--radius); }
+.ext > div { flex: 1 1 300px; }
+.ext strong { font-size: 19px; }
+.ext .btn { padding: 12px 18px; font-size: 17px; }
+
+/* 국비 교육 카드 */
+.cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; align-items: start; }
+.cards .card { margin: 0; }
+@media (max-width: 860px) { .cards { grid-template-columns: 1fr; } }
+.more { margin-top: 16px; }
+
+/* 채용행사 */
+.events { display: grid; gap: 14px; }
+.event { display: grid; grid-template-columns: 76px 1fr; gap: 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; box-shadow: var(--shadow); }
+.cal { display: grid; align-content: start; text-align: center; border-radius: 12px; overflow: hidden; border: 1.5px solid var(--accent); height: fit-content; }
+.cal-m { background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; padding: 3px 0; }
+.cal-d { font-size: 30px; font-weight: 800; line-height: 1.3; padding: 4px 0 6px; letter-spacing: -0.03em; }
+.event h3 { font-size: 20px; line-height: 1.45; font-weight: 700; letter-spacing: -0.02em; }
+.event dl { margin: 12px 0 0; display: grid; gap: 6px; }
+.event .row { grid-template-columns: 82px 1fr; }
+.event a[href^="tel"] { color: var(--accent); font-weight: 700; }
+.dir { margin-top: 10px; }
+.dir summary { cursor: pointer; color: var(--accent); font-weight: 600; font-size: 16px; }
+.dir p { margin: 8px 0 0; color: var(--ink-2); font-size: 16px; }
+@media (max-width: 640px) {
+  .event { grid-template-columns: 1fr; gap: 12px; padding: 18px; }
+  .cal { display: flex; width: fit-content; }
+  .cal-m, .cal-d { padding: 4px 12px; font-size: 16px; line-height: 1.4; }
+}
+
+/* 바로가기 */
+.links { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+.links a {
+  display: grid; grid-template-columns: 1fr auto; grid-template-rows: auto auto; column-gap: 12px; align-items: center;
+  min-height: 76px; padding: 16px 20px; background: var(--surface); border: 1.5px solid var(--line-2); border-radius: var(--radius);
+  text-decoration: none; transition: border-color .15s, background .15s;
+}
+.links a:hover { border-color: var(--accent); background: var(--accent-soft); }
+.links strong { font-size: 20px; letter-spacing: -0.02em; }
+.links .sub { grid-column: 1; }
+.links .arrow { grid-column: 2; grid-row: 1 / span 2; font-size: 22px; color: var(--accent); font-weight: 700; }
+@media (max-width: 640px) { .links { grid-template-columns: 1fr; } }
+.tip { margin-top: 28px; padding: 20px 22px; background: var(--warn-bg); border-radius: var(--radius); color: var(--ink-2); }
+.tip strong { font-size: 18px; color: var(--warn-ink); }
+.tip ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }

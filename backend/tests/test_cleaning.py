@@ -3,19 +3,13 @@ from datetime import date
 from pathlib import Path
 
 from app.cleaning.common import split_sido, to_date, to_int
-from app.cleaning.jobs import clean_job, dedupe_jobs, parse_career, parse_salary
 from app.cleaning.training import clean_training, dedupe_trainings
 import pytest
 
-from app.clients.work24 import Work24Error, check_error, parse_jobs_xml, parse_trainings_xml
+from app.clients.work24 import Work24Error, check_error, parse_trainings_xml
 
 FIX = Path(__file__).parent / "fixtures"
 TODAY = date(2025, 11, 13)
-
-
-def load_jobs():
-    _, raw = parse_jobs_xml(ET.parse(FIX / "jobs_sample.xml").getroot())
-    return [clean_job(r, TODAY) for r in raw]
 
 
 def load_trainings():
@@ -38,71 +32,6 @@ def test_split_sido():
     assert split_sido("대구광역시 달서구 월배로 100")[:2] == ("대구", "달서구")
     assert split_sido("경기 성남시 분당구")[:2] == ("경기", "성남시 분당구")
     assert split_sido("전국")[:2] == (None, None)
-
-
-# ---------------------------------------------------------------- salary / career
-def test_salary_monthly_hourly_yearly_negotiable():
-    m = parse_salary("월급", "월급 2,200,000원 이상", "2,200,000", "")
-    assert m.type == "monthly" and m.monthly_min == 2_200_000 and not m.estimated
-
-    h = parse_salary("시급", "시급 10,030원", "10030", "0")
-    assert h.type == "hourly" and h.monthly_min == 10030 * 209 and h.estimated and h.max_raw is None
-
-    y = parse_salary("연봉", "연봉 3,000만원 ~ 3,600만원", "", "")
-    assert y.type == "yearly" and y.min_raw == 30_000_000 and y.max_raw == 36_000_000
-    assert y.monthly_min == 2_500_000 and y.monthly_max == 3_000_000
-
-    n = parse_salary("", "면접후 결정", "0", "0")
-    assert n.type == "negotiable" and n.monthly_min is None
-
-
-def test_career_parsing():
-    assert parse_career("관계없음").type == "any"
-    assert parse_career("신입").type == "new"
-    c = parse_career("경력 3년이상")
-    assert c.type == "experienced" and c.min_years == 3 and c.max_years is None
-    c2 = parse_career("신입/경력 1년 ~ 3년")
-    assert c2.type == "new_or_experienced" and c2.min_years == 1 and c2.max_years == 3
-
-
-# ---------------------------------------------------------------- jobs end-to-end
-def test_jobs_cleaned_fields():
-    jobs = {j.id: j for j in load_jobs()}
-
-    j1 = jobs["K120012511130001"]
-    assert j1.title_truncated and "title_truncated" in j1.quality_flags
-    assert "&" in j1.title                      # &amp; → &
-    assert j1.sido == "대구" and j1.regions[0]["sigungu"] == "달서구"
-    assert j1.education_rank == 0 and j1.career.type == "any"
-    assert j1.close_date == date(2025, 12, 31) and j1.days_left == 48
-    assert j1.address == "대구광역시 달서구 성당로 10 2층"
-    assert j1.senior_score >= 80                 # 중장년 + 경력무관 + 학력무관
-
-    j2 = jobs["K120012511130002"]
-    assert [r["sigungu"] for r in j2.regions] == ["북구", "동구"]
-    assert j2.until_filled and j2.close_date is None
-    assert j2.emp_type and "시간선택제" in j2.emp_type
-
-    j3 = jobs["K120012511130003"]
-    assert j3.sido == "경북" and "expired" in j3.quality_flags and j3.days_left == -8
-    assert j3.education_min == "대졸(2~3년)" and j3.education_rank == 4
-
-    j4 = jobs["K120012511130004"]
-    assert "salary_missing" in j4.quality_flags and j4.senior_score < 50
-
-    j6 = jobs["K120012511130006"]
-    assert "salary_suspiciously_low" in j6.quality_flags
-    assert "region_unparsed" in j6.quality_flags
-    assert j6.reg_date == date(2025, 11, 13) and j6.close_date == date(2025, 12, 1)
-    assert j6.emp_type is None                   # 모르는 코드는 None, 크래시 없음
-
-
-def test_dedupe_jobs_same_posting_other_region():
-    jobs = load_jobs()
-    assert len(jobs) == 6
-    deduped = dedupe_jobs(jobs)
-    assert len(deduped) == 5
-    assert all(j.id != "K120012511130005" for j in deduped)
 
 
 # ---------------------------------------------------------------- training end-to-end

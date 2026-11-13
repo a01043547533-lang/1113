@@ -83,7 +83,7 @@ button, input, select { font: inherit; color: inherit; }
 .eyebrow.light { color: rgba(255,255,255,.85); }
 .hero-title {
   position: relative; display: flex; flex-direction: column; align-items: center; width: fit-content; margin: 0 auto;
-  font-size: clamp(44px, 9vw, 112px); font-weight: 850; line-height: 1.04; letter-spacing: -0.055em;
+  font-size: clamp(38px, 8.6vw, 108px); font-weight: 850; line-height: 1.04; letter-spacing: -0.055em;
   isolation: isolate;
 }
 .hero-line { position: relative; z-index: 1; }

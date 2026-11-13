@@ -88,52 +88,30 @@ def check_error(root: ET.Element) -> None:
     raise Work24Error(f"고용24 API 오류: {msg[:300]}")
 
 
-# ---------------------------------------------------------------- 채용정보
-async def fetch_jobs(
-    *,
-    region: str | None = None,
-    keyword: str | None = None,
-    occupation: str | None = None,
-    career: str | None = None,   # N 신입 / E 경력 / Z 관계없음
-    emp_tp: str | None = None,
-    start_page: int = 1,
-    display: int = 100,
-    sort: str = "DESC",
-) -> tuple[int, list[dict[str, str]]]:
-    """채용정보 목록(210L01). (총건수, 원본 dict 리스트) 반환."""
+# ---------------------------------------------------------------- 채용행사
+# 일반 채용정보(210L01)는 기업회원 전용이라 개인 키로는 "개인회원은 사용할 수 없는 OPEN-API" 오류.
+# 채용행사(210L11: 현장면접·일자리 수요데이·채용박람회)는 개인 키로 된다.
+async def fetch_events(area_cd: str, display: int = 100) -> list[dict[str, str]]:
     s = get_settings()
     if not s.WORK24_JOB_KEY:
         raise Work24Error("WORK24_JOB_KEY 가 설정되지 않았습니다 (.env 확인)")
-    params: dict[str, Any] = {
-        "authKey": s.WORK24_JOB_KEY,
-        "callTp": "L",
-        "returnType": "XML",
-        "startPage": start_page,
-        "display": min(display, 100),
-        "sortOrderBy": sort,
-    }
-    if region:
-        params["region"] = region
-    if keyword:
-        params["keyword"] = keyword
-    if occupation:
-        params["occupation"] = occupation
-    if career:
-        params["career"] = career
-        if career == "E":
-            params["minCareerM"] = 0
-            params["maxCareerM"] = 600
-    if emp_tp:
-        params["empTp"] = emp_tp
-
-    root = await _get_xml(f"{s.WORK24_BASE}/wk/callOpenApiSvcInfo210L01.do", params)
-    return parse_jobs_xml(root)
+    params = {"authKey": s.WORK24_JOB_KEY, "callTp": "L", "returnType": "XML",
+              "startPage": 1, "display": display, "areaCd": area_cd}
+    root = await _get_xml(f"{s.WORK24_BASE}/wk/callOpenApiSvcInfo210L11.do", params)
+    return parse_events_xml(root)
 
 
-def parse_jobs_xml(root: ET.Element) -> tuple[int, list[dict[str, str]]]:
-    total = int((root.findtext("total") or "0").strip() or 0)
-    items = [_el_to_dict(w) for w in root.findall("wanted")]
-    return total, items
+def parse_events_xml(root: ET.Element) -> list[dict[str, str]]:
+    return [_el_to_dict(e) for e in root.findall("empEvent")]
+
+
+async def fetch_event_detail(area_cd: str, event_no: str) -> dict[str, str]:
+    """채용행사 상세(210D11). areaCd 를 같이 보내야 한다(없으면 '정보가 존재하지 않습니다')."""
+    s = get_settings()
+    params = {"authKey": s.WORK24_JOB_KEY, "callTp": "D", "returnType": "XML",
+              "eventNo": event_no, "areaCd": area_cd}
+    root = await _get_xml(f"{s.WORK24_BASE}/wk/callOpenApiSvcInfo210D11.do", params)
+    return _el_to_dict(root)
 
 
 # ---------------------------------------------------------------- 훈련과정

@@ -2,9 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
-from app.routers import match
+from app.routers import hub
 
-app = FastAPI(title="50+ 재취업 매칭 API", version="0.1.0")
+app = FastAPI(title="50+ 재취업 길잡이 API", version="0.2.0")
 
 s = get_settings()
 app.add_middleware(
@@ -14,7 +14,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-app.include_router(match.router)
+app.include_router(hub.router)
 
 
 @app.get("/health")

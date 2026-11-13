@@ -125,6 +125,15 @@ const ICONS = {
   list: (
     <path fillRule="evenodd" d="M10 4h22l8 8v30a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm4 16v4h20v-4H14Zm0 8v4h20v-4H14Zm0 8v4h12v-4H14Z" />
   ),
+  cert: (
+    <path fillRule="evenodd" d="M8 4h32a2 2 0 0 1 2 2v22a2 2 0 0 1-2 2H30v-4h8V8H10v18h8v4H8a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Zm6 8h20v4H14v-4Zm10 10a7 7 0 0 1 5 11.9V45l-5-3-5 3V33.9A7 7 0 0 1 24 22Z" />
+  ),
+  book: (
+    <path fillRule="evenodd" d="M4 8c6-2 12-1.5 18 2v32c-6-3.5-12-4-18-2V8Zm40 0v32c-6-2-12-1.5-18 2V10c6-3.5 12-4 18-2Z" />
+  ),
+  calendar: (
+    <path fillRule="evenodd" d="M14 3h5v5h10V3h5v5h7a3 3 0 0 1 3 3v31a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3V11a3 3 0 0 1 3-3h7V3ZM9 19v21h30V19H9Zm5 5h7v7h-7v-7Z" />
+  ),
   zoom: (
     <path fillRule="evenodd" d="M20 4a16 16 0 1 0 9.4 29l9.1 9.1 4.3-4.3-9.1-9.1A16 16 0 0 0 20 4Zm0 6a10 10 0 1 1 0 20 10 10 0 0 1 0-20Z" />
   ),
