@@ -76,7 +76,7 @@ function CertDetail({ jmcd, sido }) {
       <div className="detail-grid">
         <section className="box">
           <h4>다음 일정</h4>
-          {d.always && <p className="hint">상시 시험이라 거의 매주 시험이 있어요. 지금 접수할 수 있는 회차를 가까운 순으로 보여드려요.</p>}
+          {d.always && <p className="hint">상시 시험이라 거의 매주 있어요. 지금 접수할 수 있는 회차입니다.</p>}
           {rounds.length === 0 && <p className="muted">올해 남은 시험이 없어요. 다음 해 일정은 Q-Net에 공고되면 나와요.</p>}
           <ul className="rounds">
             {rounds.map((r) => (
@@ -111,7 +111,7 @@ function CertDetail({ jmcd, sido }) {
 
       <section className="box">
         <h4>{sido} 상설 시험장 <span className="count">{venues.length}곳</span></h4>
-        <p className="hint">시험장은 원서를 접수할 때 직접 고를 수 있어요. 종목마다 열리는 곳이 달라요.</p>
+        <p className="hint">원서 접수 때 시험장을 직접 고릅니다. 종목마다 열리는 곳이 달라요.</p>
         <ul className="venues">
           {venues.slice(0, venueShown).map((v) => (
             <li key={v.address}>
@@ -158,7 +158,7 @@ export function ExamTab({ data, sido, preset }) {
         <>
           <h3 className="tab-title">{sido}에서 많이 응시한 {preset} 자격증</h3>
           <p className="tab-note">
-            {year}년 {grade} 접수자 수 기준이에요. 나이별 통계는 공개되지 않아 전체 접수자 기준으로 보여드려요.
+            {year}년 {grade} 접수자 수 순서입니다. 나이별 숫자는 공개되지 않아 전체 접수자로 셉니다. 누르면 일정과 시험장이 나와요.
           </p>
           <ol className="rank">
             {ranking.map((r) => (
@@ -184,7 +184,7 @@ export function ExamTab({ data, sido, preset }) {
 
       {(featured.length > 0 || external.length > 0) && (
         <>
-          <h3 className="tab-title">{preset} 분야 주요 자격</h3>
+          <h3 className="tab-title">{preset} 분야 자격증</h3>
           <ol className="rank plain">
             {featured.map((f) => (
               <li key={f.jmcd} className={open === f.jmcd ? "open" : ""}>
@@ -252,8 +252,8 @@ export function TrainingTab({ data, sido }) {
   return (
     <div>
       <h3 className="tab-title">{sido}에서 3개월 안에 시작하는 ‘{data.keyword}’ 국비 과정</h3>
-      <p className="tab-note">국민내일배움카드로 들을 수 있는 과정이에요. 만족도와 개강일, 훈련비를 보고 순서를 정했어요.</p>
-      {items.length === 0 && <p className="empty">지금은 시작 예정인 과정이 없어요. 다른 분야도 골라 보세요.</p>}
+      <p className="tab-note">내일배움카드로 들을 수 있는 과정입니다. 만족도가 높고 개강이 가까운 과정이 위에 있어요.</p>
+      {items.length === 0 && <p className="empty">지금은 시작 예정인 과정이 없어요. 다른 분야를 골라 보세요.</p>}
       <div className="cards">
         {items.slice(0, shown).map((t) => <TrainingCard key={t.id + t.round} t={t} />)}
       </div>
@@ -350,20 +350,19 @@ export function JobsTab({ senior, agencies, events, links, sido }) {
     <div>
       <h3 className="tab-title">{sido} 중장년 채용공고 <span className="count">{senior?.count ?? 0}건</span></h3>
       <p className="tab-note">
-        노인일자리 여기·고용24(워크넷)에 올라온 공고 중 지금 접수 중인 것이에요.
-        지역은 회사 소재지 기준이라 실제 근무지는 공고에서 확인해 주세요.
-        {senior?.newest && ` 공고는 ${md(senior.newest)}까지 등록된 것이라, 그사이 먼저 마감된 공고가 있을 수 있어요.`}
+        지금 접수 중인 공고입니다. 지역은 회사 주소 기준이니 일하는 곳은 공고에서 확인하세요.
+        {senior?.newest && ` ${md(senior.newest)}까지 올라온 공고라 그사이 마감된 것이 있을 수 있어요.`}
       </p>
       {senior?.error && <Alert title="중장년 채용공고를 불러오지 못했어요.">아래 사이트에서 바로 찾아보세요.</Alert>}
       {!senior?.error && jobs.length === 0 && (
-        <p className="empty">지금 {sido}에 접수 중인 공고가 없어요. 아래 채용행사와 다른 사이트도 확인해 보세요.</p>
+        <p className="empty">지금 {sido}에 접수 중인 공고가 없어요. 아래 채용행사와 다른 사이트를 확인해 보세요.</p>
       )}
       <div className="cards">{jobs.slice(0, shown).map((j) => <SeniorJobCard key={j.id} j={j} />)}</div>
       <More total={jobs.length} shown={shown} onMore={() => setShown(shown + PAGE)} />
 
       <h3 className="tab-title">가까운 채용행사·현장면접</h3>
       <p className="tab-note">
-        고용센터가 여는 현장면접, 일자리 수요데이, 취업박람회예요{events.area ? ` (${events.area})` : ""}. 이력서를 들고 가면 그 자리에서 면접을 볼 수 있어요.
+        고용센터가 여는 현장면접과 취업박람회입니다{events.area ? ` (${events.area})` : ""}. 이력서를 가져가면 그 자리에서 면접을 봅니다.
       </p>
       {events.error && <Alert title="채용행사를 불러오지 못했어요.">아래 사이트에서 바로 찾아보세요.</Alert>}
       {!events.error && items.length === 0 && <p className="empty">지금 예정된 행사가 없어요.</p>}
@@ -371,8 +370,8 @@ export function JobsTab({ senior, agencies, events, links, sido }) {
 
       {ags.length > 0 && (
         <>
-          <h3 className="tab-title">60세 이상이시라면: {sido} 노인일자리 기관 <span className="count">{ags.length}곳</span></h3>
-          <p className="tab-note">시니어클럽·노인복지관 등 정부 노인일자리 사업을 운영하는 곳이에요. 대부분 60세 이상(사업에 따라 65세 이상)이 대상이에요.</p>
+          <h3 className="tab-title">60세 이상: {sido} 노인일자리 기관 <span className="count">{ags.length}곳</span></h3>
+          <p className="tab-note">시니어클럽과 노인복지관처럼 정부 노인일자리를 운영하는 곳입니다. 보통 60세 이상(사업에 따라 65세 이상)이 신청할 수 있어요.</p>
           <ul className="agencies">
             {ags.slice(0, agShown).map((a) => (
               <li key={a.name + a.address}>
@@ -388,8 +387,8 @@ export function JobsTab({ senior, agencies, events, links, sido }) {
         </>
       )}
 
-      <h3 className="tab-title">같은 조건으로 공고 더 찾아보기</h3>
-      <p className="tab-note">‘{sido}’와 고르신 분야로 검색한 화면이 바로 열려요.</p>
+      <h3 className="tab-title">다른 사이트에서 더 찾기</h3>
+      <p className="tab-note">누르면 ‘{sido}’와 고른 분야로 검색한 화면이 열립니다.</p>
       <LinkGrid items={links.jobs} />
     </div>
   );
@@ -400,7 +399,7 @@ export function AlbaTab({ links, sido }) {
     <div>
       <h3 className="tab-title">{sido} 알바 찾아보기</h3>
       <p className="tab-note">
-        알바 사이트는 공개 데이터가 없어서 공고를 직접 보여드리지는 못해요. 대신 고르신 지역과 분야로 검색한 화면을 바로 열어 드려요.
+        알바 사이트는 공개 데이터가 없어서 여기서 공고를 보여 줄 수 없어요. 누르면 고른 지역과 분야로 검색한 화면이 열립니다.
       </p>
       <LinkGrid items={links.alba} />
       <div className="tip">
