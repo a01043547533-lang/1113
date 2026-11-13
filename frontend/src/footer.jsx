@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { Arrow, Logo } from "./art.jsx";
+import { Arrow, Icon, Logo } from "./art.jsx";
 
 // 운영 정보는 아직 정해지지 않아 임의의 값이다. 실제 주소·메일로 바꿔서 쓴다.
 const OPERATOR = {
@@ -133,20 +133,31 @@ export default function Footer({ onSearch, onArea, statusApi }) {
           <nav aria-labelledby="fc-1">
             <h3 id="fc-1">둘러보기</h3>
             <ul>
-              <li><button type="button" onClick={() => onArea("trainings")}>국비 교육</button></li>
-              <li><button type="button" onClick={() => onArea("exams")}>자격증 시험</button></li>
-              <li><button type="button" onClick={() => onArea("jobs")}>채용 · 알바</button></li>
-              <li><a href="#faq">자주 묻는 질문</a></li>
+              {[["trainings", "book", "국비 교육", "내일배움카드 과정"], ["exams", "cert", "자격증 시험", "일정 · 응시료 · 시험장"],
+                ["jobs", "work", "채용 · 알바", "중장년 공고 · 현장면접"]].map(([tab, icon, t, sub]) => (
+                <li key={tab}>
+                  <button type="button" className="fi" onClick={() => onArea(tab)}>
+                    <span className="fi-icon"><Icon name={icon} size={16} /></span>
+                    <span className="fi-text"><span className="fi-title">{t}</span><span className="fi-sub">{sub}</span></span>
+                  </button>
+                </li>
+              ))}
+              <li>
+                <a className="fi" href="#faq">
+                  <span className="fi-icon"><Icon name="help" size={16} /></span>
+                  <span className="fi-text"><span className="fi-title">자주 묻는 질문</span><span className="fi-sub">이용 방법 · 자료 출처</span></span>
+                </a>
+              </li>
             </ul>
           </nav>
           <nav aria-labelledby="fc-2">
             <h3 id="fc-2">공식 사이트</h3>
             <ul>
-              {OFFICIAL.map(([n, url, s, icon]) => (
+              {OFFICIAL.map(([n, url, sub, icon]) => (
                 <li key={n}>
-                  <a href={url} target="_blank" rel="noreferrer" className="foot-site">
-                    <img src={`/favicons/${icon}.png`} alt="" width="22" height="22" loading="lazy" />
-                    <span>{n}<span className="foot-sub">{s}</span></span>
+                  <a className="fi" href={url} target="_blank" rel="noreferrer">
+                    <span className="fi-icon img"><img src={`/favicons/${icon}.png`} alt="" width="18" height="18" loading="lazy" /></span>
+                    <span className="fi-text"><span className="fi-title">{n}</span><span className="fi-sub">{sub}</span></span>
                   </a>
                 </li>
               ))}
@@ -155,11 +166,15 @@ export default function Footer({ onSearch, onArea, statusApi }) {
           <div aria-labelledby="fc-3">
             <h3 id="fc-3">전화 상담</h3>
             <ul>
-              {PHONES.map(([n, num, s]) => (
-                <li key={n} className="foot-phone">
-                  <span className="foot-num">{num}</span>
-                  <span>{n}</span>
-                  <span className="foot-sub">{s}</span>
+              {PHONES.map(([n, num, sub]) => (
+                <li key={n}>
+                  <div className="fi">
+                    <span className="fi-icon"><Icon name="phone" size={16} /></span>
+                    <span className="fi-text">
+                      <span className="fi-title"><b className="fi-num">{num}</b> {n}</span>
+                      <span className="fi-sub">{sub}</span>
+                    </span>
+                  </div>
                 </li>
               ))}
             </ul>
@@ -167,9 +182,24 @@ export default function Footer({ onSearch, onArea, statusApi }) {
           <div aria-labelledby="fc-4">
             <h3 id="fc-4">운영</h3>
             <ul>
-              <li>{OPERATOR.team}</li>
-              <li><span className="foot-sub">문의</span> <span className="foot-mail">{OPERATOR.email}</span></li>
-              <li><a href={OPERATOR.blog.url} target="_blank" rel="noreferrer">{OPERATOR.blog.label}</a></li>
+              <li>
+                <div className="fi">
+                  <span className="fi-icon"><Icon name="team" size={16} /></span>
+                  <span className="fi-text"><span className="fi-title">{OPERATOR.team}</span><span className="fi-sub">무료 · 개인정보 저장 안 함</span></span>
+                </div>
+              </li>
+              <li>
+                <div className="fi">
+                  <span className="fi-icon"><Icon name="mail" size={16} /></span>
+                  <span className="fi-text"><span className="fi-title fi-copy">{OPERATOR.email}</span><span className="fi-sub">문의 메일</span></span>
+                </div>
+              </li>
+              <li>
+                <a className="fi" href={OPERATOR.blog.url} target="_blank" rel="noreferrer">
+                  <span className="fi-icon"><Icon name="pen" size={16} /></span>
+                  <span className="fi-text"><span className="fi-title">{OPERATOR.blog.label}</span><span className="fi-sub">재취업 정보 글</span></span>
+                </a>
+              </li>
             </ul>
           </div>
         </div>

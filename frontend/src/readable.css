@@ -120,3 +120,26 @@
 .foot .foot-brand p { font-size: 19px; }
 @media (max-width: 640px) { .foot .foot-brand p { font-size: 19px; } }
 .foot .foot-brand { max-width: 44em; }
+
+/* ---------- 바닥 네 칸: 모든 항목을 '아이콘 + 제목 + 한 줄 설명'으로 같은 모양 ---------- */
+.foot-cols { gap: 32px 40px; padding-block: 40px 32px; }
+.foot-cols h3 { font-size: 14px; font-weight: 700; color: var(--ink); letter-spacing: 0; margin-bottom: 8px; padding-bottom: 12px; border-bottom: 1px solid var(--line); }
+.foot-cols ul { gap: 2px; font-size: 15px; }
+.foot-cols li { min-height: 0; display: block; }
+.foot .fi { display: grid; grid-template-columns: 30px minmax(0, 1fr); gap: 12px; align-items: start; width: 100%; min-height: 52px; padding: 8px 6px 8px 0; border-radius: 10px; color: var(--ink); text-decoration: none; text-align: left; background: none; border: 0; font: inherit; }
+.foot a.fi, .foot button.fi { cursor: pointer; }
+.foot a.fi:hover, .foot button.fi:hover { background: var(--surface-2); text-decoration: none; }
+.foot a.fi:hover .fi-title, .foot button.fi:hover .fi-title { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.fi-icon { display: grid; place-items: center; width: 30px; height: 30px; border-radius: 8px; background: var(--mint-wash); color: var(--teal-ink); margin-top: 1px; }
+.fi-icon.img { background: #fff; box-shadow: 0 0 0 1px var(--hair); }
+.fi-icon.img img { width: 18px; height: 18px; object-fit: contain; }
+.fi-text { display: grid; gap: 1px; min-width: 0; }
+.fi-title { font-size: 15px; font-weight: 600; line-height: 1.45; overflow-wrap: anywhere; }
+.fi-sub { font-size: 13px; color: var(--ink-3); line-height: 1.45; }
+.fi-num { font-weight: 700; font-variant-numeric: tabular-nums; margin-right: 4px; }
+.fi-copy { user-select: all; font-weight: 500; }
+@media (max-width: 640px) {
+  .foot-cols { gap: 28px; }
+  .fi-title { font-size: 15px; }
+  .fi-sub { font-size: 14px; }
+}
