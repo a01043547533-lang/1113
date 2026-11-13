@@ -142,3 +142,12 @@ def test_age_top_file_shape():
     assert d["source"].startswith("한국산업인력공단") and d["basis"] == "응시"
     assert d["groups"]["60대 이상"]["기능사"]["ranked"][0] == "지게차운전기능사"
     assert d["groups"]["50대"]["기사"]["ranked"] == ["전기기사"]
+    assert len(d["groups"]["50대"]["기능사"]["ranked"]) == 4
+
+
+def test_gwangju_jeonnam_same_area():
+    from app.codes import same_area
+    assert same_area("광주", "전남") and same_area("전남", "광주") and same_area("서울", "서울")
+    assert not same_area("광주", "전북") and not same_area("대구", None)
+    rows = [{"examAreaGbNm": "국가자격시험장(구공단상설)", "examAreaNm": "광주 상설시험장", "address": "전남광주통합특별시 서구 상무대로 1"}]
+    assert len(clean_venues(rows, "광주")) == 1      # 통합 이름 주소도 광주 시험장으로

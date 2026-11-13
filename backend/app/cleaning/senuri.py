@@ -20,6 +20,7 @@ from datetime import date
 from urllib.parse import quote
 
 from app.cleaning.common import clean_text, split_sido, to_date
+from app.codes import same_area
 
 WORKPLC_SIDO = {
     "01": "서울", "02": "강원", "03": "경기", "04": "경남", "05": "경북", "06": "광주", "07": "대구",
@@ -132,7 +133,7 @@ def clean_agencies(rows: list[dict], sido: str) -> list[Agency]:
     for r in rows:
         addr = clean_text(" ".join([r.get("zipAddr", ""), r.get("dtlAddr", "")]))
         s, sgg, _ = split_sido(addr)
-        if s != sido:
+        if not same_area(sido, s):
             continue
         name = clean_text(r.get("orgName"))
         out.append(Agency(name=name, address=addr, sigungu=sgg,

@@ -6,7 +6,8 @@ After=network.target
 [Service]
 User=ubuntu
 WorkingDirectory=/home/ubuntu/jobmatch50/backend
-ExecStart=/home/ubuntu/jobmatch50/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 2
+# 캐시·갱신 시각이 프로세스 메모리에 있어 worker는 1개로 둔다(비동기라 충분).
+ExecStart=/home/ubuntu/jobmatch50/backend/.venv/bin/uvicorn app.main:app --host 127.0.0.1 --port 8000 --workers 1
 Restart=always
 RestartSec=3
 

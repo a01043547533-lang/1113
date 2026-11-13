@@ -49,16 +49,21 @@ async def _safe(coro, label: str):
         return {"error": f"{label}: {type(e).__name__}: {e}"}
 
 
-async def _trainings(sido: str, keyword: str, today: date, limit: int = 30) -> dict:
-    total, raw = await fetch_trainings(
-        area1=SIDO[sido][1], course_name=keyword,
-        start_from=today.strftime("%Y%m%d"), start_to=(today + timedelta(days=90)).strftime("%Y%m%d"),
-        page_size=100,
-    )
+async def _trainings(sido: str, keyword: str | list[str], today: date, limit: int = 30) -> dict:
+    words = keyword if isinstance(keyword, list) else [keyword]
+    total, raw = 0, []
+    for w in words:
+        t, r = await fetch_trainings(
+            area1=SIDO[sido][1], course_name=w,
+            start_from=today.strftime("%Y%m%d"), start_to=(today + timedelta(days=90)).strftime("%Y%m%d"),
+            page_size=100,
+        )
+        total += t
+        raw += r
     items = dedupe_trainings([clean_training(r, today) for r in raw])
     items = [t for t in items if "already_started" not in t.quality_flags]
     items.sort(key=lambda t: -t.score)
-    return {"keyword": keyword, "total": total, "count": len(items), "items": [t.to_dict() for t in items[:limit]]}
+    return {"keyword": "·".join(words), "total": total, "count": len(items), "items": [t.to_dict() for t in items[:limit]]}
 
 
 # ------------------------------------------------------------------ 메타

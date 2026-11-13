@@ -61,9 +61,17 @@ const STEPS = [
   },
 ];
 
+// 예전에 쓰던 분야 이름(블로그에 이미 걸린 링크)을 새 이름으로
+const PRESET_ALIASES = { "경비·보안": "경비·청소" };
+
 function readUrl() {
   const q = new URLSearchParams(window.location.search);
-  return { sido: q.get("sido") || "", preset: q.get("preset") || "", tab: q.get("tab") || "" };
+  let sido = q.get("sido") || "";
+  let preset = q.get("preset") || "";
+  preset = PRESET_ALIASES[preset] || preset;
+  if (sido && !FALLBACK_SIDO.includes(sido)) sido = "";
+  if (preset && !FALLBACK_PRESETS.includes(preset)) preset = "";
+  return { sido, preset, tab: q.get("tab") || "" };
 }
 
 function tabCount(key, data) {
@@ -291,7 +299,7 @@ export default function App() {
                   <div className="step-visual" aria-hidden="true">
                     <span className="frame-bar" />
                     <div className="mock">
-                      <p className="mock-head"><i className="d-sky" />{s.ui.head}</p>
+                      <p className="mock-head"><i className="d-sky" />{s.ui.head}<span className="mock-tag">예시</span></p>
                       {s.ui.rows.map(([icon, a, b]) => (
                         <div key={a} className="mock-row">
                           <span className="mock-icon"><Icon name={icon} size={18} /></span>

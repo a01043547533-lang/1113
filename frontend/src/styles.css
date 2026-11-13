@@ -307,6 +307,7 @@ button, input, select { font: inherit; color: inherit; }
 }
 .mock-head { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; color: #66636a; padding-bottom: 10px; border-bottom: 1px solid #ebebec; margin-bottom: 4px; }
 .mock-head .d-sky { background: #00d9b8; }
+.mock-tag { margin-left: auto; font-size: 12px; font-weight: 600; color: #66636a; border: 1px solid #e3e3e5; border-radius: 6px; padding: 1px 8px; }
 .mock-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid #f0f0f1; }
 .mock-row:last-child { border-bottom: 0; }
 .mock-icon { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 10px; background: #e8fffb; color: #006b5e; }

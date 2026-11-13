@@ -15,6 +15,7 @@ from dataclasses import asdict, dataclass, field
 from datetime import date, datetime
 
 from app.cleaning.common import clean_text, split_sido
+from app.codes import same_area
 
 GRADE_SUFFIX = re.compile(r"(기능사|산업기사|기사|기능장|기술사)$")
 
@@ -186,7 +187,7 @@ def clean_venues(rows: list[dict], sido: str | None = None) -> list[Venue]:
         addr = clean_text(row.get("address"))
         addr_core = re.sub(r"^\([^)]*\)\s*", "", addr)
         vs, vsgg, _ = split_sido(addr_core)
-        if sido and vs and vs != sido:
+        if sido and vs and not same_area(sido, vs):
             continue
         raw_name = clean_text(row.get("examAreaNm"))
         name = raw_name

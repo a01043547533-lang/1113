@@ -107,11 +107,3 @@ def split_sido(addr: str | None) -> tuple[str | None, str | None, str]:
         else:
             break
     return sido, (" ".join(sgg_parts) or None), raw
-
-
-def split_multi(v: str | None, seps: str = ",|/·") -> list[str]:
-    """'서울 강남구,경기 성남시' / 'A|B' → 리스트. 빈 항목 제거."""
-    s = clean_text(v)
-    if not s:
-        return []
-    return [p.strip() for p in re.split(f"[{re.escape(seps)}]", s) if p.strip()]
