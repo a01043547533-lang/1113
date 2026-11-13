@@ -11,6 +11,7 @@ from typing import Any
 
 import httpx
 
+from app import freshness
 from app.config import get_settings
 
 
@@ -65,6 +66,10 @@ async def _get_xml(url: str, params: dict[str, Any]) -> ET.Element:
         raise Work24Error(f"XML parse error: {e}") from e
     check_error(root)
     _cache.set(key, root)
+    if "310L01" in url:
+        freshness.mark("training")
+    elif "210L11" in url or "210D11" in url:
+        freshness.mark("events")
     return root
 
 

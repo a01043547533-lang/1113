@@ -18,6 +18,7 @@ from app.clients.qnet import fetch_fee, fetch_jm_list, fetch_jm_schedule, fetch_
 from app.clients.senuri import fetch_agencies, fetch_job_detail, fetch_jobs
 from app.clients.work24 import fetch_event_detail, fetch_events, fetch_trainings
 from app.codes import PRESETS, SIDO, SIDO_BRANCHES, SIDO_EVENT_AREA
+from app import freshness
 from app.config import get_settings
 
 router = APIRouter(prefix="/api", tags=["hub"])
@@ -65,6 +66,30 @@ async def _trainings(sido: str, keyword: str, today: date, limit: int = 30) -> d
 def meta():
     st = stats()
     return {"sido": list(SIDO.keys()), "presets": list(PRESETS.keys()), "stats_year": st["year"]}
+
+
+@router.get("/status")
+def status():
+    """출처별 마지막 갱신 시각. 화면 아래 '데이터 갱신 현황'에 쓴다."""
+    from datetime import datetime, timezone
+    st = stats()
+    files = sorted(DATA_DIR.glob("qnet_stats_*.json"))
+    built = st.get("built_at") or datetime.fromtimestamp(files[-1].stat().st_mtime, timezone.utc).isoformat(timespec="seconds")
+    items = [{
+        "key": "qnet_stats", "name": "자격증 응시자 순위", "org": "한국산업인력공단 Q-Net",
+        "cycle": "1년에 한 번", "ttl_min": 60 * 24 * 400, "updated_at": built,
+        "note": f"{st['year']}년 {st['grade']} 접수 {st['rows']:,}건 집계",
+    }]
+    for key, (name, org, cycle) in freshness.SOURCES.items():
+        if key == "qnet_list":
+            continue
+        t = freshness.last(key)
+        n = freshness.note(key)
+        if key in ("senior_jobs", "agencies") and not get_settings().DATA_GO_KR_KEY:
+            n = "공공데이터포털 인증키가 없어 받지 않습니다"
+        items.append({"key": key, "name": name, "org": org, "cycle": cycle, "ttl_min": freshness.TTL_MIN.get(key),
+                      "updated_at": t.isoformat(timespec="seconds") if t else None, "note": n})
+    return {"now": datetime.now(timezone.utc).isoformat(timespec="seconds"), "items": items}
 
 
 # ------------------------------------------------------------------ 시험: 지역 순위
@@ -145,6 +170,9 @@ async def _senior_jobs(sido: str, keywords: list[str], today: date, limit: int =
         out.append(d)
     out.sort(key=lambda d: (not d["match"], not d["senior_pref"]))
     newest = max((r.get("frDd", "") for r in latest), default="")
+    if len(newest) == 8:
+        freshness.set_note("senior_jobs", f"가장 최근 공고 {int(newest[4:6])}월 {int(newest[6:8])}일 등록 · 전국 접수 중 "
+                                          f"{sum(1 for r in latest if is_open(r, today))}건")
     return {"keywords": keywords, "count": len(rows), "match_count": len(match), "items": out,
             "national_open": sum(1 for r in latest if is_open(r, today)),
             "newest": f"{newest[:4]}-{newest[4:6]}-{newest[6:8]}" if len(newest) == 8 else None}
@@ -158,20 +186,27 @@ async def _agencies(sido: str) -> dict:
 
 
 def links(sido: str, job_kw: str, alba_kw: str) -> dict:
+    """같은 조건 검색 바로가기. icon 은 frontend/public/favicons/{icon}.png (한 번 받아 둔 각 사이트 파비콘).
+
+    당근알바는 검색어에 지역을 넣어도 브라우저에 설정된 '내 동네'(regionId)로 열린다
+    (2026-11-13 확인: 부산으로 찾아도 대구 동네가 뜸). 시·도 → regionId 공개 목록이 없어
+    검색어만 넘기고, 화면에서 동네를 바꾸도록 안내한다.
+    """
     j = quote(f"{sido} {job_kw}")
     a = quote(f"{sido} {alba_kw}")
     return {
         "jobs": [
-            {"site": "고용24", "url": f"https://www.work24.go.kr/wk/a/b/1200/retriveDtlEmpSrchList.do?srcKeyword={j}", "note": "정부 일자리 포털"},
-            {"site": "노인일자리 여기", "url": "https://www.seniorro.or.kr", "note": "시니어 구인 (첫 화면으로 이동)"},
-            {"site": "사람인", "url": f"https://www.saramin.co.kr/zf_user/search?searchword={j}", "note": None},
-            {"site": "잡코리아", "url": f"https://www.jobkorea.co.kr/Search/?stext={j}", "note": None},
+            {"site": "고용24", "icon": "work24", "url": f"https://www.work24.go.kr/wk/a/b/1200/retriveDtlEmpSrchList.do?srcKeyword={j}", "note": "정부 일자리 포털"},
+            {"site": "노인일자리 여기", "icon": "seniorro", "url": "https://www.seniorro.or.kr", "note": "시니어 구인 · 첫 화면으로 이동"},
+            {"site": "사람인", "icon": "saramin", "url": f"https://www.saramin.co.kr/zf_user/search?searchword={j}", "note": f"‘{sido} {job_kw}’ 검색"},
+            {"site": "잡코리아", "icon": "jobkorea", "url": f"https://www.jobkorea.co.kr/Search/?stext={j}", "note": f"‘{sido} {job_kw}’ 검색"},
         ],
         "alba": [
-            {"site": "알바몬", "url": f"https://www.albamon.com/total-search?keyword={a}", "note": None},
-            {"site": "당근알바", "url": f"https://jobs.daangn.com/s?query={a}", "note": "동네 알바"},
-            {"site": "알바천국", "url": "https://www.alba.co.kr", "note": "첫 화면으로 이동"},
-            {"site": "벼룩시장", "url": "https://www.findjob.co.kr", "note": "첫 화면으로 이동"},
+            {"site": "알바몬", "icon": "albamon", "url": f"https://www.albamon.com/total-search?keyword={a}", "note": f"‘{sido} {alba_kw}’ 검색"},
+            {"site": "당근알바", "icon": "daangn", "url": f"https://jobs.daangn.com/s?query={quote(alba_kw)}",
+             "note": f"지금 설정된 동네로 열려요 · 동네를 {sido}로 바꿔 보세요"},
+            {"site": "알바천국", "icon": "alba", "url": "https://www.alba.co.kr", "note": "첫 화면으로 이동"},
+            {"site": "벼룩시장", "icon": "findjob", "url": "https://www.findjob.co.kr", "note": "첫 화면으로 이동"},
         ],
     }
 

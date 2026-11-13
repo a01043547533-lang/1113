@@ -125,14 +125,21 @@ li.open .chev { transform: rotate(-135deg) translate(-3px, -3px); }
 /* 바로가기 */
 .links { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
 .links a {
-  display: grid; grid-template-columns: minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 12px; align-items: center;
+  display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; grid-template-rows: auto auto; column-gap: 14px; align-items: center;
   min-height: 74px; padding: 14px 22px; background: var(--surface); border: 1px solid var(--hair); border-radius: var(--r);
   text-decoration: none; box-shadow: var(--shadow); transition: border-color .15s, box-shadow .15s, transform .15s;
 }
 .links a:hover { border-color: var(--line-2); box-shadow: var(--shadow-card); transform: translateY(-1px); }
 .links strong { font-size: 19px; font-weight: 650; letter-spacing: -0.025em; }
-.links .sub { grid-column: 1; }
-.links .arrow { grid-column: 2; grid-row: 1 / span 2; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-2); font-size: 18px; color: var(--ink); }
+.links .fav {
+  grid-column: 1; grid-row: 1 / span 2; display: grid; place-items: center; width: 48px; height: 48px;
+  border-radius: 14px; background: #fff; border: 1px solid var(--hair); box-shadow: var(--shadow);
+  font-weight: 700; color: var(--ink-2); overflow: hidden;
+}
+.links .fav img { width: 28px; height: 28px; object-fit: contain; image-rendering: auto; }
+.links strong { grid-column: 2; align-self: end; }
+.links .sub { grid-column: 2; align-self: start; }
+.links .arrow { grid-column: 3; grid-row: 1 / span 2; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; background: var(--surface-2); font-size: 18px; color: var(--ink); }
 @media (max-width: 640px) { .links { grid-template-columns: 1fr; } }
 .tip { margin-top: 26px; padding: 20px 22px; background: var(--sun-bg); border-radius: var(--r); color: var(--ink); }
 .tip strong { font-size: 17px; color: var(--sun-ink); }

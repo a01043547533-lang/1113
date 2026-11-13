@@ -16,6 +16,7 @@ from typing import Any
 import httpx
 
 from app.clients.work24 import _TTLCache
+from app import freshness
 from app.config import get_settings
 
 BASE = "https://apis.data.go.kr/B552474"
@@ -58,6 +59,7 @@ async def _get(path: str, cache: _TTLCache, **params: Any) -> tuple[int, list[di
     except ET.ParseError as e:
         raise SenuriError(f"XML parse error: {e}") from e
     cache.set(ck, out)
+    freshness.mark("senior_jobs" if path.startswith("SenuriService") else "agencies")
     return out
 
 

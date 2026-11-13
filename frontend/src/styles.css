@@ -322,16 +322,6 @@ button, input, select { font: inherit; color: inherit; letter-spacing: inherit; 
 .faq details p { padding: 0 2px 24px; color: var(--ink-2); max-width: 40em; }
 @media (max-width: 820px) { .faq-in { grid-template-columns: 1fr; gap: 18px; padding-block: 48px; } .faq summary { font-size: 18px; } }
 
-/* ---------------------------------------------------------------- 바닥 */
-.foot { border-top: 1px solid var(--line); background: var(--surface); }
-.foot-in { display: grid; gap: 16px; padding-block: 44px 52px; font-size: 15px; color: var(--ink-3); }
-.foot-top { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-.foot-src { display: flex; flex-wrap: wrap; gap: 10px 36px; margin: 4px 0 0; }
-.foot-src div { display: grid; }
-.foot-src dt { font-size: 13px; color: var(--ink-3); }
-.foot-src dd { margin: 0; font-weight: 600; color: var(--ink); font-size: 15px; }
-.copy { font-size: 13px; }
-
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   *, *::before, *::after { animation: none !important; transition: none !important; }

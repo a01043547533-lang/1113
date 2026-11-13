@@ -131,3 +131,6 @@ def test_links_encode_region_and_keyword():
     ln = links("대구", "요양보호사", "요양보호사")
     assert {l["site"] for l in ln["jobs"]} >= {"고용24", "사람인"}
     assert "%EB%8C%80%EA%B5%AC" in ln["jobs"][0]["url"]      # '대구' 인코딩
+    dg = next(l for l in ln["alba"] if l["site"] == "당근알바")
+    assert "%EB%8C%80%EA%B5%AC" not in dg["url"] and "대구" in dg["note"]   # 당근은 지역을 검색어로 못 바꿈
+    assert all(l["icon"] for l in ln["jobs"] + ln["alba"])

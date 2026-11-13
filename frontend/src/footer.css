@@ -1,0 +1,70 @@
+/* 바닥: 브랜드 줄 → 데이터 갱신 현황 → 네 칸 링크 → 맨 아래 줄. 색은 styles.css 토큰. */
+.foot { border-top: 1px solid var(--line); background: var(--surface); color: var(--ink-2); }
+.foot-hero {
+  display: flex; align-items: center; justify-content: space-between; gap: 24px; flex-wrap: wrap;
+  padding-block: 56px 40px;
+}
+.foot-brand { display: grid; gap: 10px; max-width: 34em; }
+.foot-brand p { font-size: 17px; color: var(--ink-3); }
+
+/* 데이터 갱신 현황 */
+.fresh { background: var(--bg); border: 1px solid var(--hair); border-radius: var(--r-lg); padding: 26px 28px 20px; }
+.fresh-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 16px; }
+.fresh-head h2 { font-size: 22px; font-weight: 650; letter-spacing: -0.035em; color: var(--ink); }
+.fresh-head p { font-size: 15px; color: var(--ink-3); margin-top: 2px; }
+.fresh-empty { color: var(--ink-3); font-size: 16px; padding: 12px 0; }
+.fresh-table { display: grid; }
+.fresh-row {
+  display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1.2fr) minmax(0, .8fr) minmax(0, 1fr);
+  gap: 16px; align-items: center; padding: 13px 4px; border-top: 1px solid var(--line); font-size: 16px;
+}
+.fresh-row.head { border-top: 0; padding-block: 4px 10px; font-size: 13px; font-weight: 600; color: var(--ink-3); letter-spacing: .02em; }
+.fresh-name { display: flex; align-items: flex-start; gap: 10px; min-width: 0; }
+.fresh-name > span { display: grid; min-width: 0; }
+.fresh-name strong { font-weight: 600; color: var(--ink); }
+.fresh-name em { font-style: normal; font-size: 14px; color: var(--ink-3); }
+.fresh-org, .fresh-cycle { color: var(--ink-2); }
+.fresh-time { display: grid; font-variant-numeric: tabular-nums; }
+.fresh-time strong { font-weight: 600; color: var(--ink); }
+.fresh-time time { font-size: 14px; color: var(--ink-3); }
+.fresh-row .m { display: none; }
+.st { flex: none; width: 9px; height: 9px; border-radius: 50%; margin-top: 8px; }
+.st-fresh { background: var(--leaf); box-shadow: 0 0 0 3px var(--leaf-bg); }
+.st-old { background: var(--sun); box-shadow: 0 0 0 3px var(--sun-bg); }
+.st-wait, .st-off { background: var(--line-2); box-shadow: 0 0 0 3px var(--surface-2); }
+.fresh-legend { list-style: none; padding: 12px 4px 0; margin: 4px 0 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: 8px 22px; font-size: 14px; color: var(--ink-3); }
+.fresh-legend li { display: inline-flex; align-items: center; gap: 8px; }
+.fresh-legend .st { margin-top: 0; }
+@media (max-width: 760px) {
+  .fresh { padding: 20px 16px 16px; border-radius: 20px; }
+  .fresh-row.head { display: none; }
+  .fresh-row { grid-template-columns: 1fr auto; gap: 4px 12px; padding: 14px 2px; }
+  .fresh-name { grid-column: 1; }
+  .fresh-time { grid-column: 2; grid-row: 1 / span 3; text-align: right; align-self: start; }
+  .fresh-org, .fresh-cycle { grid-column: 1; font-size: 14px; color: var(--ink-3); padding-left: 19px; }
+  .fresh-row .m { display: inline; font-weight: 600; margin-right: 6px; }
+}
+
+/* 네 칸 링크 */
+.foot-cols { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 28px; padding-block: 44px 36px; }
+.foot-cols h3 { font-size: 14px; font-weight: 650; color: var(--ink-3); letter-spacing: .02em; margin-bottom: 12px; }
+.foot-cols ul { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; font-size: 16px; }
+.foot-cols a, .foot-cols button {
+  display: inline-grid; color: var(--ink); text-decoration: none; background: none; border: 0; padding: 0;
+  font: inherit; text-align: left; cursor: pointer;
+}
+.foot-cols a:hover, .foot-cols button:hover { text-decoration: underline; text-underline-offset: 4px; text-decoration-thickness: 1px; }
+.foot-sub { display: block; font-size: 14px; color: var(--ink-3); }
+.foot-cols a.foot-site { display: inline-flex; align-items: flex-start; gap: 10px; }
+.foot-site img { flex: none; margin-top: 2px; width: 22px; height: 22px; border-radius: 6px; background: #fff; box-shadow: 0 0 0 1px var(--hair); object-fit: contain; padding: 2px; }
+.foot-phone { display: grid; }
+.foot-num { font-size: 22px; font-weight: 650; letter-spacing: -0.02em; color: var(--ink); font-variant-numeric: tabular-nums; user-select: all; }
+.foot-mail { user-select: all; color: var(--ink); }
+@media (max-width: 900px) { .foot-cols { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .foot-cols { grid-template-columns: 1fr; gap: 24px; } }
+
+.foot-bottom {
+  display: flex; flex-wrap: wrap; gap: 6px 24px; padding-block: 22px 40px; border-top: 1px solid var(--line);
+  font-size: 14px; color: var(--ink-3);
+}
+.foot-bottom p:last-child { flex-basis: 100%; }

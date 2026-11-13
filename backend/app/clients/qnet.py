@@ -17,6 +17,7 @@ from typing import Any
 import httpx
 
 from app.clients.work24 import _TTLCache
+from app import freshness
 from app.config import get_settings
 
 QNET = "http://openapi.q-net.or.kr/api/service/rest"
@@ -59,6 +60,12 @@ async def get_items(path: str, **params: Any) -> list[dict[str, str]]:
     except ET.ParseError as e:
         raise QnetError(f"XML parse error: {e}") from e
     _cache.set(key, items)
+    if path.startswith("InquiryTestInformationNTQSVC"):
+        freshness.mark("qnet_schedule")
+    elif path.startswith("InquiryExamAreaSVC"):
+        freshness.mark("qnet_venues")
+    elif path.startswith("InquiryListNationalQualifcationSVC"):
+        freshness.mark("qnet_list")
     return items
 
 

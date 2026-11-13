@@ -269,6 +269,9 @@ function LinkGrid({ items }) {
       {items.map((l) => (
         <li key={l.site}>
           <a href={l.url} target="_blank" rel="noreferrer">
+            <span className="fav" aria-hidden="true">
+              {l.icon ? <img src={`/favicons/${l.icon}.png`} alt="" width="28" height="28" loading="lazy" /> : l.site.slice(0, 1)}
+            </span>
             <strong>{l.site}</strong>
             {l.note && <span className="sub">{l.note}</span>}
             <span className="arrow" aria-hidden="true">→</span>

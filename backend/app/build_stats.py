@@ -19,6 +19,7 @@ import json
 import time
 import xml.etree.ElementTree as ET
 from collections import defaultdict
+from datetime import datetime, timezone
 from pathlib import Path
 
 import httpx
@@ -86,6 +87,7 @@ def build(year: int) -> dict:
         "grade": "기능사",
         "source": "한국산업인력공단 거주지별 기술자격 시험 접수 현황(InquiryExameeAbdSVC)",
         "rows": rows_seen,
+        "built_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
         "always": sorted(always),
         "meta": {n: meta(n) for n in national},
         "national": dict(sorted(national.items(), key=lambda x: -x[1])),

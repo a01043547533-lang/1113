@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Arrow, HeroArt, Icon, Logo, PreviewCard, SIGNS } from "./art.jsx";
+import Footer, { useStatus } from "./footer.jsx";
 import { AlbaTab, ExamTab, JobsTab, TrainingTab } from "./sections.jsx";
 
 const FALLBACK_SIDO = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
@@ -69,6 +70,7 @@ export default function App() {
   const [error, setError] = useState("");
   const resultsRef = useRef(null);
   const searchRef = useRef(null);
+  const statusApi = useStatus();
 
   useEffect(() => {
     fetch("/api/meta")
@@ -93,6 +95,7 @@ export default function App() {
       const r = await fetch("/api/hub?" + new URLSearchParams({ sido, preset }).toString());
       if (!r.ok) throw new Error(String(r.status));
       setData(await r.json());
+      statusApi.refresh();   // 방금 받은 자료의 갱신 시각 반영
       requestAnimationFrame(() => resultsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }));
     } catch {
       setData(null);
@@ -279,21 +282,7 @@ export default function App() {
         </section>
       </main>
 
-      <footer className="foot">
-        <div className="wrap foot-in">
-          <div className="foot-top">
-            <Logo />
-            <button type="button" className="pill-btn light sm" onClick={toSearch}>내 조건으로 찾기</button>
-          </div>
-          <dl className="foot-src">
-            <div><dt>자격증 시험</dt><dd>한국산업인력공단 Q-Net</dd></div>
-            <div><dt>국비 교육 · 채용행사</dt><dd>고용24</dd></div>
-            <div><dt>중장년 채용공고</dt><dd>한국노인인력개발원</dd></div>
-          </dl>
-          <p>시험·과정·공고의 최신 내용은 각 기관 페이지에서 확인하세요. 이 사이트는 개인정보를 모으거나 저장하지 않습니다.</p>
-          <p className="copy">© 2026 50+ 재취업 길잡이</p>
-        </div>
-      </footer>
+      <Footer onSearch={toSearch} onArea={openArea} statusApi={statusApi} />
     </>
   );
 }
