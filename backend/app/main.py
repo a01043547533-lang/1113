@@ -15,7 +15,8 @@ async def _warm():
     from app.clients.qnet import fetch_jm_list
     from app.clients.senuri import fetch_agencies
     from datetime import date
-    for make in (fetch_jm_list, lambda: _senior_jobs("서울", [], date.today(), detail_n=0), fetch_agencies):
+    from app.routers.hub import highlights
+    for make in (fetch_jm_list, lambda: _senior_jobs("서울", [], date.today(), detail_n=0), fetch_agencies, highlights):
         try:
             await make()
         except Exception:

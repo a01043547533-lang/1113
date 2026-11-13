@@ -155,3 +155,32 @@ li.open .chev { transform: rotate(-135deg) translate(-3px, -3px); }
 .agencies strong { font-size: 17px; font-weight: 600; }
 .agencies .btn { flex: none; padding: 9px 14px; font-size: 15px; }
 @media (max-width: 760px) { .agencies { grid-template-columns: 1fr; } }
+
+/* 50대·60대 인기 자격증 */
+.agetop { padding: 24px; margin-bottom: 8px; border-radius: var(--r-lg); background: linear-gradient(180deg, var(--mint-wash), var(--surface) 70%); border: 1px solid var(--hair); }
+.agetop-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.agetop-head .tab-title { margin-top: 0; }
+.agetop-head .tab-note { margin-bottom: 0; }
+.seg { display: inline-grid; grid-auto-flow: column; gap: 4px; padding: 4px; background: var(--surface); border: 1px solid var(--hair); border-radius: 12px; }
+.seg button { display: grid; justify-items: center; min-width: 116px; padding: 8px 14px; border: 0; border-radius: 9px; background: none; cursor: pointer; font-size: 17px; font-weight: 700; color: var(--ink-3); line-height: 1.25; }
+.seg button span { font-size: 12px; font-weight: 500; }
+.seg button.on { background: var(--ink); color: var(--bg); }
+.seg button.on span { color: var(--mint); }
+.agetop-sub { margin: 18px 0 8px; font-size: 14px; font-weight: 700; color: var(--ink-3); letter-spacing: .02em; }
+.rank.age .rank-btn { grid-template-columns: 40px minmax(0, 1fr) auto 20px; }
+.age-no { display: grid; place-items: center; width: 40px; height: 40px; border-radius: 50%; font-weight: 700; font-size: 17px; background: var(--ink); color: var(--mint); font-variant-numeric: tabular-nums; }
+.rank.age li:not(:first-child) .age-no { background: var(--mint-wash); color: var(--teal-ink); }
+.age-no.soft { background: var(--surface-2) !important; color: var(--ink-3) !important; }
+.rank.age.compact .rank-btn { grid-template-columns: 84px minmax(0, 1fr) auto 20px; padding-block: 13px; }
+.age-grade { font-size: 14px; font-weight: 700; color: var(--teal-ink); background: var(--mint-wash); border-radius: 6px; padding: 3px 8px; justify-self: start; }
+.agetop-src { margin-top: 14px; font-size: 13px; color: var(--ink-3); line-height: 1.6; }
+@media (max-width: 640px) {
+  .agetop { padding: 16px; }
+  .seg { width: 100%; grid-auto-columns: 1fr; }
+  .seg button { min-width: 0; }
+  .rank.age .rank-btn { grid-template-columns: 36px minmax(0, 1fr) 18px; }
+  .rank.age.compact .rank-btn { grid-template-columns: 70px minmax(0, 1fr) 18px; }
+  .rank.age .rank-count { grid-column: 2; grid-row: 2; }
+  .rank.age .chev { grid-column: 3; grid-row: 1 / span 2; }
+  .rank.age .age-no, .rank.age .age-grade { grid-row: span 2; }
+}

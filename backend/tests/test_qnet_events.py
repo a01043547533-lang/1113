@@ -134,3 +134,11 @@ def test_links_encode_region_and_keyword():
     dg = next(l for l in ln["alba"] if l["site"] == "당근알바")
     assert "%EB%8C%80%EA%B5%AC" not in dg["url"] and "대구" in dg["note"]   # 당근은 지역을 검색어로 못 바꿈
     assert all(l["icon"] for l in ln["jobs"] + ln["alba"])
+
+
+def test_age_top_file_shape():
+    from app.routers.hub import age_top_raw
+    d = age_top_raw()
+    assert d["source"].startswith("한국산업인력공단") and d["basis"] == "응시"
+    assert d["groups"]["60대 이상"]["기능사"]["ranked"][0] == "지게차운전기능사"
+    assert d["groups"]["50대"]["기사"]["ranked"] == ["전기기사"]

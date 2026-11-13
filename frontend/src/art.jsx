@@ -1,5 +1,5 @@
 // 아이콘, 로고, 히어로 카드 줄.
-// 히어로 카드 줄은 사진 대신 실제로 받은 데이터(2026-11-13, 대구·조리·제과제빵 예시와 전국 공고 수)를 담는다.
+// 히어로 카드 줄은 사진 대신 전국 실시간 숫자(/api/highlights)를 담는다.
 
 export const SIGNS = [
   { tab: "trainings", word: "배우고", label: "국비 교육", tone: "sky" },
@@ -51,20 +51,42 @@ export function Logo() {
   );
 }
 
-// 히어로 아래 카드 줄 (높이를 엇갈리게)
-const TILES = [
-  { tab: "trainings", kind: "dark", h: 72, icon: "book", label: "국비 교육", big: "31", unit: "개 과정", sub: "대구 · 3개월 안에 시작" },
-  { tab: "exams", kind: "light", h: 86, icon: "cert", label: "한식조리기능사", big: "14,500", unit: "원", sub: "필기 응시료 · 실기 26,900원", chip: "상시 시험" },
-  { tab: "jobs", kind: "mint", h: 60, icon: "cal", label: "현장 채용행사", big: "11.17", unit: "", sub: "제3차 달성군 취업박람회 · 14:00" },
-  { tab: "jobs", kind: "dark", h: 96, icon: "work", label: "중장년 채용공고", big: "259", unit: "건", sub: "전국 지금 접수 중 · 50세 이상 우대 포함" },
-  { tab: "exams", kind: "light", h: 74, icon: "pin", label: "대구 상설 시험장", big: "25", unit: "곳", sub: "디지털시험센터 포함" },
-];
+// 히어로 아래 카드 줄: /api/highlights 의 전국 숫자로 채운다(높이를 엇갈리게).
+const n = (v) => (v == null ? "—" : Number(v).toLocaleString("ko-KR"));
+const cut = (t, k = 22) => (t && t.length > k ? t.slice(0, k).trim() + "…" : t || "");
+const md = (iso) => (iso ? `${Number(iso.slice(5, 7))}월 ${Number(iso.slice(8, 10))}일` : "");
 
-export function HeroTiles({ onOpen }) {
+export function agoText(iso) {
+  if (!iso) return "";
+  const m = Math.max(0, Math.round((Date.now() - new Date(iso)) / 60000));
+  return m < 1 ? "방금" : m < 60 ? `${m}분 전` : `${Math.round(m / 60)}시간 전`;
+}
+
+function buildTiles(hl) {
+  const sc = hl?.senior_courses, pc = hl?.popular_courses, jb = hl?.jobs, ev = hl?.events;
+  const age = hl?.age_top?.groups?.["50대"];
+  const ok = (x) => x && !x.error;
+  const pcs = Array.isArray(pc) ? pc : [];
+  return [
+    { tab: "trainings", kind: "dark", h: 72, icon: "book", label: "중장년 대상 국비 과정",
+      big: ok(sc) ? n(sc.count) : "—", unit: "개", sub: ok(sc) && sc.top ? `${cut(sc.top.title)} · ${sc.top.sido || ""}` : "중장년·신중년·시니어 과정" },
+    { tab: "trainings", kind: "light", h: 86, icon: "cal", label: `많이 열리는 국비 과정${pcs[0] ? ` · ${pcs[0].name}` : ""}`,
+      big: pcs[0] ? n(pcs[0].count) : "—", unit: "개 회차", sub: pcs.slice(1, 3).map((x) => `${x.name} ${n(x.count)}`).join(" · ") || "3개월 안에 시작" },
+    { tab: "exams", kind: "mint", h: 64, icon: "cert", label: "50·60대 응시 1위", text: true,
+      big: age ? "지게차" : "—", unit: "", sub: "지게차운전기능사 · 기사는 전기기사 · 2025년 필기 응시자" },
+    { tab: "jobs", kind: "dark", h: 96, icon: "work", label: "중장년 채용공고 접수 중",
+      big: ok(jb) ? n(jb.open) : "—", unit: "건", sub: ok(jb) && jb.kinds?.[0] ? `가장 많은 일: ${jb.kinds[0].name} ${n(jb.kinds[0].count)}건` : "전국 기준" },
+    { tab: "jobs", kind: "light", h: 74, icon: "pin", label: "다가오는 채용행사",
+      big: ok(ev) ? n(ev.count) : "—", unit: "건", sub: ok(ev) && ev.next ? `${cut(ev.next.title, 18)} · ${md(ev.next.date)}` : "고용센터 현장면접·박람회" },
+  ];
+}
+
+export function HeroTiles({ hl, loading, onOpen }) {
+  const tiles = buildTiles(hl);
   return (
-    <div className="tiles-wrap">
+    <div className={"tiles-wrap" + (loading ? " is-loading" : "")}>
       <div className="tiles">
-        {TILES.map((t, i) => (
+        {tiles.map((t, i) => (
           <button
             key={i}
             type="button"
@@ -76,9 +98,8 @@ export function HeroTiles({ onOpen }) {
               <span className="tile-icon"><Icon name={t.icon} size={20} /></span>
               <span className="tile-label">{t.label}</span>
             </span>
-            <span className="tile-num">{t.big}<small>{t.unit}</small></span>
+            <span className={"tile-num" + (t.text ? " is-text" : "")}>{t.big}<small>{t.unit}</small></span>
             <span className="tile-sub">{t.sub}</span>
-            {t.chip && <span className="tile-chip">{t.chip}</span>}
           </button>
         ))}
       </div>

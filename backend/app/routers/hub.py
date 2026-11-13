@@ -92,6 +92,105 @@ def status():
     return {"now": datetime.now(timezone.utc).isoformat(timespec="seconds"), "items": items}
 
 
+# ------------------------------------------------------------------ 50대·60대 인기 자격증(공단 발표)
+@lru_cache
+def age_top_raw() -> dict:
+    files = sorted(DATA_DIR.glob("age_top_*.json"))
+    return json.loads(files[-1].read_text(encoding="utf-8")) if files else {}
+
+
+async def age_top() -> dict:
+    """공단 발표 순위에 종목코드를 붙인다(누르면 실시간 일정·응시료를 볼 수 있게)."""
+    raw = age_top_raw()
+    if not raw:
+        return {}
+    try:
+        jm = {r["jmfldnm"]: r["jmcd"] for r in await fetch_jm_list()}
+    except Exception:
+        jm = {}
+    groups = {}
+    for age, grades in raw["groups"].items():
+        rows = []
+        for grade, g in grades.items():
+            for i, name in enumerate(g["ranked"]):
+                rows.append({"grade": grade, "name": name, "rank": i + 1, "jmcd": jm.get(name), "ranked": True})
+            for name in g["also"]:
+                rows.append({"grade": grade, "name": name, "rank": None, "jmcd": jm.get(name), "ranked": False})
+        groups[age] = rows
+    meta = {k: raw[k] for k in ("title", "source", "released", "population", "basis", "note", "shares")}
+    return {**meta, "groups": groups}
+
+
+# ------------------------------------------------------------------ 첫 화면: 전국 숫자
+SENIOR_COURSE_WORDS = ["중장년", "신중년", "시니어"]
+POPULAR_COURSE_WORDS = ["요양보호사", "조리", "경비", "지게차", "전기", "바리스타", "사무"]
+JOB_KINDS = [("미화·청소", ("미화", "청소", "환경")), ("경비·보안", ("경비", "보안")), ("요양·돌봄", ("요양", "돌봄", "간병")),
+             ("운전", ("운전", "기사")), ("조리·급식", ("조리", "주방", "급식")), ("사무", ("사무", "경리"))]
+_hl_cache: dict = {}
+
+
+async def _highlights() -> dict:
+    today = date.today()
+    a, b = today.strftime("%Y%m%d"), (today + timedelta(days=90)).strftime("%Y%m%d")
+
+    async def senior_courses():
+        seen, items = set(), []
+        for kw in SENIOR_COURSE_WORDS:
+            _, raw = await fetch_trainings(course_name=kw, start_from=a, start_to=b, page_size=100)
+            for t in dedupe_trainings([clean_training(r, today) for r in raw]):
+                if t.id not in seen and "already_started" not in t.quality_flags:
+                    seen.add(t.id); items.append(t)
+        items.sort(key=lambda t: -t.score)
+        top = items[0] if items else None
+        return {"count": len(items), "top": top and {"title": top.title, "sido": top.sido, "start": top.start_date.isoformat() if top.start_date else None}}
+
+    async def popular_courses():
+        counts = []
+        for kw in POPULAR_COURSE_WORDS:
+            total, _ = await fetch_trainings(course_name=kw, start_from=a, start_to=b, page_size=1)
+            counts.append({"name": kw, "count": total})
+        return sorted(counts, key=lambda x: -x["count"])
+
+    async def jobs():
+        latest = await fetch_jobs(None, 1000)
+        open_rows = [r for r in latest if is_open(r, today)]
+        kinds = [{"name": n, "count": sum(1 for r in open_rows if any(w in r.get("recrtTitle", "") for w in ws))} for n, ws in JOB_KINDS]
+        return {"open": len(open_rows), "kinds": sorted(kinds, key=lambda x: -x["count"])}
+
+    async def events():
+        rows = []
+        for area in ("51", "52", "53", "54", "55", "56", "57"):
+            rows += upcoming(await fetch_events(area), today)
+        rows.sort(key=lambda r: r.get("startDt", ""))
+        nxt = clean_event(rows[0], None, today) if rows else None
+        return {"count": len(rows), "next": nxt and {"title": nxt.title, "date": nxt.date.isoformat() if nxt.date else None, "area": nxt.area}}
+
+    sc, pc, jb, ev, at = await asyncio.gather(
+        _safe(senior_courses(), "중장년 과정"), _safe(popular_courses(), "많이 열리는 과정"),
+        _safe(jobs(), "중장년 공고"), _safe(events(), "채용행사"), _safe(age_top(), "연령별 순위"),
+    )
+    st = stats()
+    nat = list(st["national"].items())[:3]
+    return {
+        "senior_courses": sc, "popular_courses": pc, "jobs": jb, "events": ev, "age_top": at,
+        "top_certs": {"year": st["year"], "grade": st["grade"], "items": [{"name": n, "count": c} for n, c in nat]},
+    }
+
+
+@router.get("/highlights")
+async def highlights():
+    """첫 화면 카드용 전국 숫자. 각 원본은 이미 캐시되지만 묶음 결과도 30분 캐시한다."""
+    from datetime import datetime, timezone
+    hit = _hl_cache.get("v")
+    if hit and (datetime.now(timezone.utc) - hit[0]).total_seconds() < 1800:
+        return hit[1]
+    data = await _highlights()
+    data["updated_at"] = datetime.now(timezone.utc).isoformat(timespec="seconds")
+    if not any(isinstance(v, dict) and "error" in v for v in data.values()):
+        _hl_cache["v"] = (datetime.now(timezone.utc), data)
+    return data
+
+
 # ------------------------------------------------------------------ 시험: 지역 순위
 def ranking(sido: str, preset: str | None, limit: int = 10) -> list[dict]:
     st = stats()
@@ -220,12 +319,13 @@ async def hub(
     _check(sido, preset)
     p = PRESETS[preset]
     today = date.today()
-    trainings, events, featured, senior, agencies = await asyncio.gather(
+    trainings, events, featured, senior, agencies, ages = await asyncio.gather(
         _safe(_trainings(sido, p["train"], today), "훈련과정"),
         _safe(_events(sido, today), "채용행사"),
         _safe(_featured(p["certs"]), "자격 목록"),
         _safe(_senior_jobs(sido, p["senior"], today), "노인 구인정보"),
         _safe(_agencies(sido), "노인일자리 수행기관"),
+        _safe(age_top(), "연령별 순위"),
     )
     st = stats()
     return {
@@ -233,6 +333,7 @@ async def hub(
         "exams": {
             "year": st["year"], "grade": st["grade"],
             "ranking": ranking(sido, preset),
+            "age_top": ages if isinstance(ages, dict) and "error" not in ages else None,
             "featured": featured if isinstance(featured, list) else [],
             "external": p["external"],
         },

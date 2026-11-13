@@ -179,6 +179,9 @@ button, input, select { font: inherit; color: inherit; }
 .tile-label { font-size: 16px; font-weight: 600; }
 .tile-num { margin-top: auto; font-family: var(--head); font-size: clamp(40px, 3.6vw, 54px); font-weight: 600; line-height: 1; letter-spacing: -0.04em; font-variant-numeric: tabular-nums; }
 .tile-num small { font-size: .38em; font-weight: 600; margin-left: 4px; letter-spacing: 0; }
+.tile-num.is-text { font-size: clamp(34px, 3vw, 46px); }
+.tiles-wrap.is-loading .tile-num, .tiles-wrap.is-loading .tile-sub { animation: pulse 1.2s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .45; } }
 .tile-sub { font-size: 15px; line-height: 1.5; opacity: .82; }
 .tile-chip { position: absolute; top: 22px; right: 20px; font-size: 13px; font-weight: 600; padding: 2px 9px; border-radius: 6px; background: var(--mint-wash); color: var(--teal-ink); }
 @keyframes tile-in { from { transform: translateY(18px); } to { transform: none; } }

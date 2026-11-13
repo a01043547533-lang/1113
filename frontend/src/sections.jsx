@@ -146,6 +146,68 @@ function CertDetail({ jmcd, sido }) {
   );
 }
 
+function AgeTop({ info, open, toggle, sido }) {
+  const ages = Object.keys(info.groups);
+  const [age, setAge] = useState(ages[0]);
+  const rows = info.groups[age] || [];
+  const main = rows.filter((r) => r.grade === "기능사");
+  const others = rows.filter((r) => r.grade !== "기능사");
+  const Item = ({ r, children }) => (
+    <li className={open === r.jmcd ? "open" : ""}>
+      <button type="button" className="rank-btn" onClick={() => toggle(r.jmcd)} aria-expanded={open === r.jmcd} disabled={!r.jmcd}>
+        {children}
+        <span className="chev" aria-hidden="true" />
+      </button>
+      {open === r.jmcd && <CertDetail jmcd={r.jmcd} sido={sido} />}
+    </li>
+  );
+  return (
+    <section className="agetop" aria-labelledby="agetop-title">
+      <div className="agetop-head">
+        <div>
+          <h3 id="agetop-title" className="tab-title">50대·60대가 많이 응시한 자격증</h3>
+          <p className="tab-note">
+            전국 기준이에요. 누르면 {sido}의 다음 시험 일정, 응시료, 시험장이 나옵니다.
+          </p>
+        </div>
+        <div className="seg" role="tablist" aria-label="나이대">
+          {ages.map((a) => (
+            <button key={a} type="button" role="tab" aria-selected={age === a} className={age === a ? "on" : ""} onClick={() => setAge(a)}>
+              {a}<span>응시자의 {info.shares?.[a]}%</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <p className="agetop-sub">기능사</p>
+      <ol className="rank plain age">
+        {main.map((r) => (
+          <Item key={r.name} r={r}>
+            <span className={"age-no" + (r.ranked ? "" : " soft")}>{r.ranked ? r.rank : "·"}</span>
+            <span className="rank-main"><span className="rank-name">{r.name}</span></span>
+            <span className="rank-count sub">{r.ranked ? (r.rank === 1 ? "가장 많이 응시" : `${r.rank}위`) : "많이 응시"}</span>
+          </Item>
+        ))}
+      </ol>
+
+      <p className="agetop-sub">다른 등급 1위</p>
+      <ol className="rank plain age compact">
+        {others.map((r) => (
+          <Item key={r.grade + r.name} r={r}>
+            <span className="age-grade">{r.grade}</span>
+            <span className="rank-main"><span className="rank-name">{r.name}</span></span>
+            <span className="rank-count sub">1위</span>
+          </Item>
+        ))}
+      </ol>
+      <p className="agetop-src">
+        출처: {info.source} ({info.released.replaceAll("-", ".")} 발표) · {info.population} 기준 순위.
+        공단은 나이별 종목 인원을 공개하지 않아 순위만 보여 줍니다.
+      </p>
+    </section>
+  );
+}
+
 export function ExamTab({ data, sido, preset }) {
   const [open, setOpen] = useState(null);
   const { ranking, featured, external, year, grade } = data;
@@ -154,6 +216,7 @@ export function ExamTab({ data, sido, preset }) {
 
   return (
     <div>
+      {data.age_top && <AgeTop info={data.age_top} open={open} toggle={toggle} sido={sido} />}
       {ranking.length > 0 && (
         <>
           <h3 className="tab-title">{sido}에서 많이 응시한 {preset} 자격증</h3>

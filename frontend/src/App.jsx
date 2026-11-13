@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Arrow, HeroTiles, Icon, Logo, SIGNS } from "./art.jsx";
+import { Arrow, HeroTiles, Icon, Logo, SIGNS, agoText } from "./art.jsx";
 import Footer, { useStatus } from "./footer.jsx";
 import { AlbaTab, ExamTab, JobsTab, TrainingTab } from "./sections.jsx";
 
@@ -85,12 +85,19 @@ export default function App() {
   const resultsRef = useRef(null);
   const searchRef = useRef(null);
   const statusApi = useStatus();
+  const [hl, setHl] = useState(null);
+  const [hlLoading, setHlLoading] = useState(true);
 
   useEffect(() => {
     fetch("/api/meta")
       .then((r) => (r.ok ? r.json() : Promise.reject()))
       .then((m) => setMeta({ sido: m.sido, presets: m.presets }))
       .catch(() => {});
+    fetch("/api/highlights")
+      .then((r) => (r.ok ? r.json() : Promise.reject()))
+      .then(setHl)
+      .catch(() => setHl(null))
+      .finally(() => setHlLoading(false));
     if (init.sido && init.preset) search();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -171,8 +178,12 @@ export default function App() {
               <button type="button" className="btn-x line lg" onClick={() => openArea("exams")}>자격증 순위 보기</button>
             </div>
           </div>
-          <HeroTiles onOpen={openArea} />
-          <p className="wrap tiles-cap">대구 · 조리·제과제빵으로 찾은 예시와 전국 공고 수입니다. 카드를 누르면 그 내용부터 열립니다.</p>
+          <HeroTiles hl={hl} loading={hlLoading} onOpen={openArea} />
+          <p className="wrap tiles-cap">
+            {hlLoading ? "전국 숫자를 모으는 중입니다…" : hl ? (
+              <>전국 기준 · {agoText(hl.updated_at)} 갱신 · 50·60대 순위는 한국산업인력공단 「2026 국가기술자격 수험자 기초현황」. 카드를 누르면 그 내용부터 열립니다.</>
+            ) : "전국 숫자를 불러오지 못했습니다. 아래에서 내 조건으로 찾아보세요."}
+          </p>
         </section>
 
         <section className="finder" id="search" ref={searchRef} aria-labelledby="finder-title">
