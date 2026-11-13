@@ -12,10 +12,13 @@ from fastapi import APIRouter, HTTPException, Query
 
 from app.cleaning.events import clean_event, upcoming
 from app.cleaning.qnet import clean_schedule, clean_venues, parse_fee, training_keyword
+from app.cleaning.senuri import clean_agencies, clean_job, is_open, pick
 from app.cleaning.training import clean_training, dedupe_trainings
 from app.clients.qnet import fetch_fee, fetch_jm_list, fetch_jm_schedule, fetch_venues
+from app.clients.senuri import fetch_agencies, fetch_job_detail, fetch_jobs
 from app.clients.work24 import fetch_event_detail, fetch_events, fetch_trainings
 from app.codes import PRESETS, SIDO, SIDO_BRANCHES, SIDO_EVENT_AREA
+from app.config import get_settings
 
 router = APIRouter(prefix="/api", tags=["hub"])
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
@@ -112,6 +115,48 @@ async def _events(sido: str, today: date, limit: int = 6) -> dict:
     return {"area": rows[0].get("area") if rows else None, "items": [e.to_dict() for e in items]}
 
 
+async def _senior_jobs(sido: str, keywords: list[str], today: date, limit: int = 40, detail_n: int = 12) -> dict:
+    """노인 구인정보.
+
+    실측: 접수 중인 공고는 전국 약 260건이고 모두 최신 1,000건 안에 있다(2쪽부터는 전부 마감).
+    그래서 최신 1,000건을 1시간 캐시로 한 번만 받아 모든 분야가 나눠 쓰고,
+    지역 공고를 전부 보여주되 관심 분야 검색어가 제목에 있는 공고를 위로 올린다.
+    """
+    if not get_settings().DATA_GO_KR_KEY:
+        return {"error": "DATA_GO_KR_KEY 미설정", "items": []}
+    latest = await fetch_jobs(None, 1000)
+    rows = pick(latest, sido, today)
+    match = {r["jobId"] for r in rows if any(k in r.get("recrtTitle", "") for k in keywords)}
+    rows.sort(key=lambda r: r["jobId"] not in match)          # 안정 정렬: 관심 분야 먼저, 그 안은 최신순
+
+    async def detail(r):
+        try:
+            return await fetch_job_detail(r["jobId"])
+        except Exception:
+            return None
+    head = rows[:detail_n]
+    details = await asyncio.gather(*(detail(r) for r in head))
+    items = [clean_job(r, d, today) for r, d in zip(head, details)]
+    items += [clean_job(r, None, today) for r in rows[detail_n:limit]]
+    out = []
+    for j in items:
+        d = j.to_dict()
+        d["match"] = j.id in match
+        out.append(d)
+    out.sort(key=lambda d: (not d["match"], not d["senior_pref"]))
+    newest = max((r.get("frDd", "") for r in latest), default="")
+    return {"keywords": keywords, "count": len(rows), "match_count": len(match), "items": out,
+            "national_open": sum(1 for r in latest if is_open(r, today)),
+            "newest": f"{newest[:4]}-{newest[4:6]}-{newest[6:8]}" if len(newest) == 8 else None}
+
+
+async def _agencies(sido: str) -> dict:
+    if not get_settings().DATA_GO_KR_KEY:
+        return {"error": "DATA_GO_KR_KEY 미설정", "items": []}
+    items = clean_agencies(await fetch_agencies(), sido)
+    return {"count": len(items), "items": [a.__dict__ for a in items]}
+
+
 def links(sido: str, job_kw: str, alba_kw: str) -> dict:
     j = quote(f"{sido} {job_kw}")
     a = quote(f"{sido} {alba_kw}")
@@ -140,10 +185,12 @@ async def hub(
     _check(sido, preset)
     p = PRESETS[preset]
     today = date.today()
-    trainings, events, featured = await asyncio.gather(
+    trainings, events, featured, senior, agencies = await asyncio.gather(
         _safe(_trainings(sido, p["train"], today), "훈련과정"),
         _safe(_events(sido, today), "채용행사"),
         _safe(_featured(p["certs"]), "자격 목록"),
+        _safe(_senior_jobs(sido, p["senior"], today), "노인 구인정보"),
+        _safe(_agencies(sido), "노인일자리 수행기관"),
     )
     st = stats()
     return {
@@ -156,6 +203,8 @@ async def hub(
         },
         "trainings": trainings,
         "events": events,
+        "senior_jobs": senior,
+        "agencies": agencies,
         "links": links(sido, p["job"], p["alba"]),
     }
 

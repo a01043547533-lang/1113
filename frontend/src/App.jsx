@@ -5,7 +5,7 @@ import { AlbaTab, ExamTab, JobsTab, TrainingTab } from "./sections.jsx";
 const FALLBACK_SIDO = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
   "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
 const FALLBACK_PRESETS = ["조리·제과제빵", "운전·중장비", "전기·설비·시설관리", "건축·인테리어", "조경·농업·산림",
-  "용접·기계·자동차", "미용", "요양·돌봄", "경비·보안", "사무·부동산·상담"];
+  "용접·기계·자동차", "미용", "요양·돌봄", "경비·청소", "사무·부동산·상담"];
 
 const CLEANING_STEPS = [
   "6만 줄이 넘는 시험 접수 통계를 우리 지역 순위로 바꿨어요",
@@ -26,8 +26,8 @@ const FAQ = [
     "지게차·굴착기·조리·제과제빵·미용 같은 일부 기능사는 정해진 날이 아니라 거의 매주 시험이 있어요. 원하는 날짜를 골라 접수할 수 있어요."],
   ["국민내일배움카드는 누가 받을 수 있나요?",
     "대부분의 구직자와 재직자가 신청할 수 있지만 일부 예외가 있어요. 정확한 자격과 자부담 비율은 고용24에서 확인해 주세요."],
-  ["일반 채용공고는 왜 직접 안 보여주나요?",
-    "정부 채용공고 데이터는 기업회원만 받을 수 있고, 민간 구인 사이트는 공개 데이터를 주지 않아요. 그래서 고용센터 채용행사는 직접 보여드리고, 일반 공고와 알바는 같은 조건으로 검색한 화면을 바로 열어 드려요."],
+  ["채용공고는 어디에서 가져오나요?",
+    "한국노인인력개발원이 공개한 중장년·노인 구인정보와 고용센터 채용행사는 직접 보여드려요. 그 밖의 일반 공고와 알바는 민간 사이트가 공개 데이터를 주지 않아서, 같은 조건으로 검색한 화면을 바로 열어 드려요."],
 ];
 
 const TABS = [
@@ -99,7 +99,7 @@ function readUrl() {
 function tabCount(key, data) {
   if (key === "exams") return (data.exams.ranking?.length || 0) + (data.exams.featured?.length || 0) + (data.exams.external?.length || 0);
   if (key === "trainings") return data.trainings.count;
-  if (key === "jobs") return data.events.items?.length;
+  if (key === "jobs") return (data.senior_jobs?.count || 0) + (data.events.items?.length || 0);
   return null;
 }
 
@@ -251,7 +251,7 @@ export default function App() {
                 <div className="tab-panel" role="tabpanel">
                   {tab === "exams" && <ExamTab data={data.exams} sido={data.query.sido} preset={data.query.preset} />}
                   {tab === "trainings" && <TrainingTab data={data.trainings} sido={data.query.sido} />}
-                  {tab === "jobs" && <JobsTab events={data.events} links={data.links} sido={data.query.sido} />}
+                  {tab === "jobs" && <JobsTab senior={data.senior_jobs} agencies={data.agencies} events={data.events} links={data.links} sido={data.query.sido} />}
                   {tab === "alba" && <AlbaTab links={data.links} sido={data.query.sido} />}
                 </div>
               </div>
@@ -275,7 +275,7 @@ export default function App() {
             items={[
               ["cert", "자격증 시험", "우리 지역에서 많이 따는 자격증, 다음 시험 날짜, 응시료, 가까운 시험장을 알려드려요."],
               ["book", "국비 교육", "국민내일배움카드로 배울 수 있는 과정을 개강이 가까운 순으로 보여드려요."],
-              ["work", "취업·알바", "고용센터 채용행사·현장면접을 알려드리고, 일자리·알바 사이트 검색을 한 번에 열어 드려요."],
+              ["work", "취업·알바", "지금 접수 중인 중장년 채용공고와 고용센터 현장면접을 보여드리고, 알바 사이트 검색도 한 번에 열어 드려요."],
             ]}
           />
           <FeatureRow
@@ -314,7 +314,7 @@ export default function App() {
           <Reflection />
           <div className="wrap foot-in">
             <Logo />
-            <p>자료 출처: 한국산업인력공단 Q-Net OPEN-API(종목·시험일정·응시료·시험장·접수 통계), 고용24 OPEN-API(국민내일배움카드 훈련과정·채용행사)</p>
+            <p>자료 출처: 한국산업인력공단 Q-Net OPEN-API(종목·시험일정·응시료·시험장·접수 통계), 고용24 OPEN-API(국민내일배움카드 훈련과정·채용행사), 한국노인인력개발원(노인 구인정보·노인일자리 수행기관, 공공데이터포털)</p>
             <p>시험·과정·행사의 최신 내용은 각 기관 페이지에서 꼭 확인해 주세요.</p>
             <p>이 서비스는 이름·연락처 등 개인정보를 수집하거나 저장하지 않습니다.</p>
             <p className="copy">© 2026 50+ 재취업 길잡이</p>

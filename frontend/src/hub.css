@@ -126,3 +126,13 @@ li.open .chev { transform: rotate(-135deg) translate(-3px, -3px); }
 .tip { margin-top: 28px; padding: 20px 22px; background: var(--warn-bg); border-radius: var(--radius); color: var(--ink-2); }
 .tip strong { font-size: 18px; color: var(--warn-ink); }
 .tip ul { margin: 8px 0 0; padding-left: 20px; display: grid; gap: 6px; }
+
+/* 중장년 채용공고 · 노인일자리 기관 */
+.badges { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.pill.green { background: #e7f6ec; color: #116b35; }
+.card.job h3 { font-size: 20px; }
+.agencies { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.agencies li { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+.agencies strong { font-size: 18px; }
+.agencies .btn { flex: none; padding: 10px 14px; font-size: 16px; }
+@media (max-width: 760px) { .agencies { grid-template-columns: 1fr; } }

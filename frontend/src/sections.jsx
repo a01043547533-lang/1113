@@ -310,10 +310,57 @@ function EventCard({ e }) {
   );
 }
 
-export function JobsTab({ events, links, sido }) {
+function SeniorJobCard({ j }) {
+  return (
+    <article className="card job">
+      <div className="card-head">
+        <span className="due">
+          {j.days_left === 0 ? "오늘 마감" : `마감까지 ${j.days_left}일`} · {md(j.end)}
+        </span>
+        <span className="badges">
+          {j.match && <span className="pill">관심 분야</span>}
+          {j.senior_pref && <span className="pill green">50세 이상 우대</span>}
+        </span>
+      </div>
+      <h3>{j.title}</h3>
+      <p className="org">{j.company}</p>
+      <dl>
+        {j.place_hint && <Row label="근무 동네">{j.place_hint}</Row>}
+        {(j.emp_type || j.headcount) && (
+          <Row label="조건">{[j.emp_type, j.headcount ? `${j.headcount}명 모집` : null].filter(Boolean).join(" · ")}</Row>
+        )}
+        {j.address && <Row label="회사 주소">{j.address}</Row>}
+      </dl>
+      {j.url && (
+        <a className="card-link" href={j.url} target="_blank" rel="noreferrer">
+          고용24에서 공고 보기 <span aria-hidden="true">→</span>
+        </a>
+      )}
+    </article>
+  );
+}
+
+export function JobsTab({ senior, agencies, events, links, sido }) {
+  const [shown, setShown] = useState(PAGE);
+  const [agShown, setAgShown] = useState(6);
+  const jobs = senior?.items || [];
+  const ags = agencies?.items || [];
   const items = events.items || [];
   return (
     <div>
+      <h3 className="tab-title">{sido} 중장년 채용공고 <span className="count">{senior?.count ?? 0}건</span></h3>
+      <p className="tab-note">
+        노인일자리 여기·고용24(워크넷)에 올라온 공고 중 지금 접수 중인 것이에요.
+        지역은 회사 소재지 기준이라 실제 근무지는 공고에서 확인해 주세요.
+        {senior?.newest && ` 공고는 ${md(senior.newest)}까지 등록된 것이라, 그사이 먼저 마감된 공고가 있을 수 있어요.`}
+      </p>
+      {senior?.error && <Alert title="중장년 채용공고를 불러오지 못했어요.">아래 사이트에서 바로 찾아보세요.</Alert>}
+      {!senior?.error && jobs.length === 0 && (
+        <p className="empty">지금 {sido}에 접수 중인 공고가 없어요. 아래 채용행사와 다른 사이트도 확인해 보세요.</p>
+      )}
+      <div className="cards">{jobs.slice(0, shown).map((j) => <SeniorJobCard key={j.id} j={j} />)}</div>
+      <More total={jobs.length} shown={shown} onMore={() => setShown(shown + PAGE)} />
+
       <h3 className="tab-title">가까운 채용행사·현장면접</h3>
       <p className="tab-note">
         고용센터가 여는 현장면접, 일자리 수요데이, 취업박람회예요{events.area ? ` (${events.area})` : ""}. 이력서를 들고 가면 그 자리에서 면접을 볼 수 있어요.
@@ -322,7 +369,26 @@ export function JobsTab({ events, links, sido }) {
       {!events.error && items.length === 0 && <p className="empty">지금 예정된 행사가 없어요.</p>}
       <div className="events">{items.map((e) => <EventCard key={e.id} e={e} />)}</div>
 
-      <h3 className="tab-title">같은 조건으로 공고 찾아보기</h3>
+      {ags.length > 0 && (
+        <>
+          <h3 className="tab-title">60세 이상이시라면: {sido} 노인일자리 기관 <span className="count">{ags.length}곳</span></h3>
+          <p className="tab-note">시니어클럽·노인복지관 등 정부 노인일자리 사업을 운영하는 곳이에요. 대부분 60세 이상(사업에 따라 65세 이상)이 대상이에요.</p>
+          <ul className="agencies">
+            {ags.slice(0, agShown).map((a) => (
+              <li key={a.name + a.address}>
+                <div>
+                  <strong>{a.name}</strong>
+                  <p className="sub">{a.address}</p>
+                </div>
+                <a className="btn btn-ghost" href={a.map_url} target="_blank" rel="noreferrer">지도·전화 보기</a>
+              </li>
+            ))}
+          </ul>
+          <More total={ags.length} shown={agShown} onMore={() => setAgShown(agShown + 12)} />
+        </>
+      )}
+
+      <h3 className="tab-title">같은 조건으로 공고 더 찾아보기</h3>
       <p className="tab-note">‘{sido}’와 고르신 분야로 검색한 화면이 바로 열려요.</p>
       <LinkGrid items={links.jobs} />
     </div>
