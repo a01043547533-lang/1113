@@ -164,7 +164,30 @@ cd backend && python -m app.build_stats --year 2025     # 약 1분, 60회 호출
 `backend/tests/fixtures/`에 실제 응답에서 본 이상한 케이스를 추가하고 `pytest`로 확인한다.
 픽스처에 개인정보(담당자 이름·이메일 등)가 들어가지 않게 지운 뒤 커밋한다.
 
-## 4. AWS EC2 배포
+## 4. 도커로 실행·배포 (권장)
+
+```
+docker-compose.yml        api(FastAPI, 8000) + web(Nginx가 React 빌드 서빙, /api 는 api로 전달, 80번)
+backend/Dockerfile        python:3.12-slim + uvicorn
+frontend/Dockerfile       node:20 빌드 → nginx:1.27-alpine
+frontend/nginx.conf       정적 파일·/api 프록시·gzip·캐시
+deploy/docker-deploy.sh   EC2에서 도커 설치·스왑·빌드·실행을 한 번에
+```
+
+```bash
+cp backend/.env.example backend/.env   # 인증키 입력 (깃허브에는 올리지 않음)
+docker compose up -d --build           # http://localhost
+```
+
+EC2(Ubuntu):
+```bash
+git clone https://github.com/a01043547533-lang/1113.git jobmatch50 && cd jobmatch50
+nano backend/.env                      # 인증키
+bash deploy/docker-deploy.sh           # 도커 설치 → 빌드 → 실행 → /health 확인
+```
+보안 그룹 인바운드에 80(HTTP)을 열어야 한다. 코드를 고친 뒤에는 서버에서 `bash deploy/docker-deploy.sh`를 다시 실행한다.
+
+## 5. AWS EC2 배포 (도커 없이)
 
 1. EC2 인스턴스 생성: Ubuntu 22.04/24.04, t2.micro(또는 t3.micro), 보안 그룹 인바운드 **22(내 IP), 80, 443** 허용
 2. 접속 후:
@@ -184,7 +207,7 @@ cd backend && python -m app.build_stats --year 2025     # 약 1분, 60회 호출
 
 `.env`(인증키)는 `.gitignore`에 들어 있어 GitHub에 올라가지 않는다. 서버에서 직접 만든다.
 
-## 5. 다음 단계
+## 6. 다음 단계
 - 사람인 API 승인 시 일반 채용공고도 연결
 - 자격증 상세에서 종목별 시험장(실기 장소) 연결
 - 분야별 "다음 달 접수 마감 자격증" 모아보기 (블로그 글 소재)

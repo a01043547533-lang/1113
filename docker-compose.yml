@@ -1,0 +1,14 @@
+# docker compose up -d --build  →  http://<서버 주소>
+services:
+  api:
+    build: ./backend
+    env_file: ./backend/.env        # 인증키(깃허브에 올리지 않음). backend/.env.example 참고
+    restart: unless-stopped
+
+  web:
+    build: ./frontend
+    ports:
+      - "80:80"
+    depends_on:
+      - api
+    restart: unless-stopped
