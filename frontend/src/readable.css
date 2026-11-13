@@ -1,0 +1,82 @@
+/* 가독성 기준 (마지막에 불러와 앞의 크기를 덮는다)
+   측정(2026-11-13): 대비는 모두 기준 통과. 12~14px 글자, 85자/줄 안내문, 19~35px 높이 링크를 고친다.
+   - 읽는 글자: PC 15px 이상, 휴대폰 16px 이상 / 작은 표시(배지·숫자 표시)는 14px 이상
+   - 안내·출처 한 줄은 약 44자 이내
+   - 누르는 곳은 높이(또는 너비) 44px 이상 */
+
+/* ---------- 글자 크기: PC 기준 ---------- */
+.logo-text sup { font-size: 12px; }
+.tiles-cap { font-size: 15px; max-width: 46em; margin-inline: auto; line-height: 1.6; }
+.step { width: 30px; height: 30px; font-size: 15px; }
+.mock-tag { font-size: 14px; }
+.fc-ex { font-size: 15px; }
+.tab-count { font-size: 15px; }
+.seg button span { font-size: 14px; }
+.agetop-sub { font-size: 15px; }
+.age-grade { font-size: 15px; }
+.agetop-src { font-size: 15px; max-width: 44em; }
+.tag { font-size: 14px; }
+.pillsm { font-size: 14px; }
+.pill { font-size: 15px; }
+.cal-m { font-size: 14px; }
+.event dd { max-width: 36em; }
+.tip li { max-width: 44em; }
+.tab-note { max-width: 44em; }
+
+/* 바닥 */
+.fresh-more { font-size: 15px; }
+.fresh-tools { font-size: 15px; }
+.link-btn.sm { font-size: 15px; }
+.fl-name { font-size: 15px; }
+.fl-name em { font-size: 14px; }
+.fl-time { font-size: 15px; }
+.foot-cols h3 { font-size: 15px; }
+.foot-cols ul { font-size: 17px; }
+.foot-sub { font-size: 15px; }
+.foot-bottom { font-size: 15px; }
+.foot-bottom p { max-width: 44em; }
+
+/* ---------- 누르는 곳 44px ---------- */
+.nav-logo { display: inline-flex; align-items: center; min-height: 44px; }
+.nav-links a, .nav-links button { display: inline-flex; align-items: center; min-height: 44px; padding-inline: 4px; }
+.link-btn { display: inline-flex; align-items: center; min-height: 44px; }
+.card-link { min-height: 44px; margin-top: 10px; }
+.mini a { display: flex; align-items: center; min-height: 44px; line-height: 1.45; }
+.event a[href^="tel"] { display: inline-flex; align-items: center; min-height: 44px; }
+.foot-cols ul { gap: 2px; }
+.foot-cols a, .foot-cols button { min-height: 44px; align-items: center; align-content: center; }
+.foot-cols a.foot-site { align-items: flex-start; padding-block: 8px; }
+.foot-cols li:not(:has(a, button)) { min-height: 44px; display: grid; align-content: center; }
+.fresh-sum { min-height: 48px; }
+
+/* ---------- 휴대폰 ---------- */
+@media (max-width: 640px) {
+  body { font-size: 18px; }
+  .tile-sub { font-size: 16px; }
+  .tiles-cap { font-size: 16px; }
+  .kicker { font-size: 16px; }
+  .mock-head { font-size: 16px; }
+  .mock-b { font-size: 16px; }
+  .fresh-line strong, .fresh-line span { font-size: 16px; }
+  .tab { font-size: 16px; padding-inline: 2px; letter-spacing: -0.02em; }
+  .tab-count { font-size: 14px; }
+  .rank-count { font-size: 16px; }
+  .hint { font-size: 16px; }
+  .sub { font-size: 16px; }
+  .due { font-size: 16px; }
+  .btn { font-size: 16px; }
+  .pill { font-size: 15px; }
+  .tag { font-size: 15px; }
+  .agetop-sub { font-size: 16px; }
+  .agetop-src { font-size: 16px; }
+  .fc-ex { font-size: 16px; }
+  .fl-name { font-size: 16px; }
+  .fl-name em { font-size: 15px; }
+  .fl-time, .fresh-tools, .fresh-more, .link-btn.sm { font-size: 16px; }
+  .foot-cols h3 { font-size: 16px; }
+  .foot-sub, .foot-bottom { font-size: 16px; }
+  .row { grid-template-columns: 76px minmax(0, 1fr); font-size: 17px; }
+  .tab-note { font-size: 16px; }
+  .agencies .btn, .ext .btn, .alert .btn { font-size: 16px; }
+  .age-grade { font-size: 16px; }
+}
