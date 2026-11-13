@@ -108,3 +108,15 @@
 /* ---------- '세 가지' 띠의 배우고·취득하고·다시 일하기: 요청에 따라 두 단계(2px씩) 크게 ---------- */
 .step-copy .kicker { font-size: 19px; font-weight: 700; }
 @media (max-width: 640px) { .step-copy .kicker { font-size: 20px; } }
+
+/* ---------- 바닥 맨 위 로고·소개 문장: 요청에 따라 두 단계(2px씩) 크게 ---------- */
+.foot .foot-brand .logo-text { font-size: 21px; }
+.foot .foot-brand .logo-text sup { font-size: 13px; }
+.foot .foot-brand .logo-mark { height: 26px; gap: 4px; }
+.foot .foot-brand .logo-mark i { width: 8px; }
+.foot .foot-brand .logo-mark i:nth-child(1) { height: 12px; }
+.foot .foot-brand .logo-mark i:nth-child(2) { height: 19px; }
+.foot .foot-brand .logo-mark i:nth-child(3) { height: 26px; }
+.foot .foot-brand p { font-size: 19px; }
+@media (max-width: 640px) { .foot .foot-brand p { font-size: 19px; } }
+.foot .foot-brand { max-width: 44em; }
