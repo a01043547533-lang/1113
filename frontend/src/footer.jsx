@@ -1,11 +1,10 @@
 import { useCallback, useEffect, useState } from "react";
 import { Arrow, Icon, Logo } from "./art.jsx";
 
-// 운영 정보는 아직 정해지지 않아 임의의 값이다. 실제 주소·메일로 바꿔서 쓴다.
 const OPERATOR = {
   team: "재취업 길잡이 운영팀",
-  email: "hello@example.com",
-  blog: { label: "운영 블로그", url: "https://blog.example.com" },
+  email: "cdh7533@naver.com",
+  blog: { label: "운영 블로그", url: "https://blog.naver.com/cdh7533" },
 };
 
 const OFFICIAL = [
@@ -189,10 +188,10 @@ export default function Footer({ onSearch, onArea, statusApi }) {
                 </div>
               </li>
               <li>
-                <div className="fi">
+                <a className="fi" href={`mailto:${OPERATOR.email}`}>
                   <span className="fi-icon"><Icon name="mail" size={16} /></span>
-                  <span className="fi-text"><span className="fi-title fi-copy">{OPERATOR.email}</span><span className="fi-sub">문의 메일</span></span>
-                </div>
+                  <span className="fi-text"><span className="fi-title fi-copy">{OPERATOR.email}</span><span className="fi-sub">문의 메일 · 누르면 메일 쓰기</span></span>
+                </a>
               </li>
               <li>
                 <a className="fi" href={OPERATOR.blog.url} target="_blank" rel="noreferrer">

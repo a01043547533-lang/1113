@@ -1,7 +1,38 @@
 import { useEffect, useRef, useState } from "react";
 import { Arrow, HeroTiles, Icon, Logo, SIGNS, agoText } from "./art.jsx";
 import Footer, { useStatus } from "./footer.jsx";
-import { AlbaTab, ExamTab, JobsTab, TrainingTab } from "./sections.jsx";
+import { AlbaTab, ExamTab, JobsTab, LinkGrid, TrainingTab } from "./sections.jsx";
+
+// 신청·접수 바로 가기. 주소는 2026-11-14에 직접 열어 확인했다(각 기관이 주소를 바꾸면 여기만 고친다).
+// - 고용24 발급안내 페이지 안에 '발급신청' 버튼이 있다. 훈련 통합검색 = '훈련 찾기·신청' 메뉴.
+// - Q-Net 원서접수 신청(rcv202)은 로그인 화면으로 먼저 열리고, 로그인하면 접수 화면으로 이어진다.
+// - 국시원은 메뉴를 스크립트로 그려 요양보호사 접수 화면 주소를 확인하지 못해 첫 화면으로 보낸다.
+const APPLY = [
+  {
+    title: "국비 교육 신청",
+    steps: ["내일배움카드가 없으면 먼저 발급 신청", "카드가 나오면 과정을 골라 수강 신청"],
+    links: [
+      { site: "내일배움카드 발급 신청", icon: "work24", note: "고용24 · 발급 안내와 신청",
+        url: "https://www.work24.go.kr/hr/h/a/1100/selectIssuGudn.do" },
+      { site: "훈련 과정 찾기·신청", icon: "work24", note: "고용24 · 지역·분야로 찾아 신청",
+        url: "https://www.work24.go.kr/hr/a/a/1100/trnnCrsInf.do" },
+    ],
+    phone: ["1350", "고용노동부 고객상담센터"],
+  },
+  {
+    title: "자격증 시험 접수",
+    steps: ["Q-Net에 로그인하고 원서접수 신청", "종목·시험장을 고르고 응시료 결제"],
+    links: [
+      { site: "원서접수 신청", icon: "qnet", note: "Q-Net · 로그인 후 접수",
+        url: "https://www.q-net.or.kr/rcv202.do?id=rcv20210&gSite=Q&gId=" },
+      { site: "이번 달 시험 일정", icon: "qnet", note: "Q-Net · 월간 시험일정",
+        url: "https://www.q-net.or.kr/crf021.do?id=crf02103&gSite=Q&gId=&CST_ID=CRF_Stns_06" },
+      { site: "요양보호사 시험", icon: "kuksiwon", note: "국시원 · 첫 화면으로 이동",
+        url: "https://www.kuksiwon.or.kr/index.do" },
+    ],
+    phone: ["1644-8000", "한국산업인력공단 고객센터"],
+  },
+];
 
 const FALLBACK_SIDO = ["서울", "부산", "대구", "인천", "광주", "대전", "울산", "세종", "경기", "강원",
   "충북", "충남", "전북", "전남", "경북", "경남", "제주"];
@@ -9,17 +40,18 @@ const FALLBACK_PRESETS = ["조리·제과제빵", "운전·중장비", "전기·
   "용접·기계·자동차", "미용", "요양·돌봄", "경비·청소", "사무·부동산·상담"];
 
 // 관심 분야 카드: 아이콘과 대표 자격·일자리(실제 데이터에서 많이 나온 것)
-const FIELDS = {
-  "조리·제과제빵": ["cook", "한식조리기능사 · 제빵기능사 · 급식 조리원"],
-  "운전·중장비": ["truck", "지게차 · 굴착기 · 승합차 운전원"],
-  "전기·설비·시설관리": ["bolt", "전기기능사 · 위험물기능사 · 건물 관리원"],
-  "건축·인테리어": ["home", "도배 · 실내건축 · 건축도장"],
-  "조경·농업·산림": ["leaf", "조경기능사 · 산림기능사 · 화훼장식"],
-  "용접·기계·자동차": ["wrench", "용접 · 자동차정비 · 생산직"],
-  "미용": ["scissors", "미용사(일반) · 네일 · 피부"],
-  "요양·돌봄": ["heart", "요양보호사 · 간병 · 아이돌봄"],
-  "경비·청소": ["shield", "경비지도사 · 아파트 미화원 · 건물 청소"],
-  "사무·부동산·상담": ["brief", "공인중개사 · 주택관리사보 · 직업상담사"],
+// 관심 분야 예시. 조건 고르기에서 고른 분야 아래에 보여 준다(예전 '어떤 일을 찾으세요?' 카드에 있던 내용).
+const FIELD_EX = {
+  "조리·제과제빵": "한식조리기능사 · 제빵기능사 · 급식 조리원",
+  "운전·중장비": "지게차 · 굴착기 · 승합차 운전원",
+  "전기·설비·시설관리": "전기기능사 · 위험물기능사 · 건물 관리원",
+  "건축·인테리어": "도배 · 실내건축 · 건축도장",
+  "조경·농업·산림": "조경기능사 · 산림기능사 · 화훼장식",
+  "용접·기계·자동차": "용접 · 자동차정비 · 생산직",
+  "미용": "미용사(일반) · 네일 · 피부",
+  "요양·돌봄": "요양보호사 · 간병 · 아이돌봄",
+  "경비·청소": "경비지도사 · 아파트 미화원 · 건물 청소",
+  "사무·부동산·상담": "공인중개사 · 주택관리사보 · 직업상담사",
 };
 
 const FAQ = [
@@ -89,6 +121,13 @@ export default function App() {
   const [tab, setTab] = useState(TABS.some(([k]) => k === init.tab) ? init.tab : "exams");
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [pending, setPending] = useState("");   // 찾는 중 표시를 띄울 버튼
+  const [menuOpen, setMenuOpen] = useState(false);   // 휴대폰 메뉴
+  // 메뉴를 닫은 '뒤에' 이동한다. 같이 하면 펼친 메뉴 높이만큼 덜 내려간 자리를 계산해, 메뉴가 사라질 때 그만큼 지나친다.
+  const menuGo = (fn) => {
+    setMenuOpen(false);
+    requestAnimationFrame(() => requestAnimationFrame(fn));
+  };
   const [error, setError] = useState("");
   const resultsRef = useRef(null);
   const searchRef = useRef(null);
@@ -115,11 +154,15 @@ export default function App() {
     window.history.replaceState(null, "", "?" + p.toString());
   }
 
-  async function search(e) {
+  // nextTab: 첫 화면에서 누른 버튼(자격증 시험 / 국비 교육 …). 없으면 지금 탭 그대로(주소로 들어온 경우, Enter).
+  async function search(e, nextTab) {
     e?.preventDefault();
+    const t = nextTab || tab;
+    setTab(t);
+    setPending(t);
     setLoading(true);
     setError("");
-    syncUrl();
+    syncUrl({ tab: t });
     try {
       const r = await fetch("/api/hub?" + new URLSearchParams({ sido, preset }).toString());
       if (!r.ok) throw new Error(String(r.status));
@@ -150,12 +193,9 @@ export default function App() {
     else toSearch();
   }
 
-  function pickField(p) {
-    setPreset(p);
-    toSearch();
-  }
-
-  const goal = SIGNS.find((s) => s.tab === tab) || SIGNS[2];
+  // 결과 보기 버튼: 자격증 시험·국비 교육 중 고른다. 채용·알바 메뉴나 카드로 내려왔으면 그 버튼도 함께.
+  const views = [["exams", "자격증 시험"], ["trainings", "국비 교육"]];
+  if (tab === "jobs" || tab === "alba") views.push([tab, tab === "jobs" ? "채용 · 알바" : "알바"]);
 
   return (
     <>
@@ -168,10 +208,34 @@ export default function App() {
             <button type="button" onClick={() => openArea("trainings")}>국비 교육</button>
             <button type="button" onClick={() => openArea("exams")}>자격증 시험</button>
             <button type="button" onClick={() => openArea("jobs")}>채용 · 알바</button>
+            <a href="#apply">신청·접수</a>
             <a href="#faq">자주 묻는 질문</a>
           </nav>
-          <button type="button" className="btn-x dark sm" onClick={toSearch}>바로 찾기</button>
+          {/* 휴대폰(900px 이하)에서는 위 메뉴가 숨겨져서, 같은 메뉴를 펼쳐 보는 버튼 */}
+          <button
+            type="button"
+            className="nav-menu-btn"
+            aria-expanded={menuOpen}
+            aria-controls="mobile-menu"
+            aria-label={menuOpen ? "메뉴 닫기" : "메뉴 열기"}
+            onClick={() => setMenuOpen((o) => !o)}
+          >
+            <span className={"burger" + (menuOpen ? " x" : "")} aria-hidden="true"><i /><i /><i /></span>
+            <span className="nav-menu-label">{menuOpen ? "닫기" : "메뉴"}</span>
+          </button>
+          <button type="button" className="btn-x dark sm" onClick={() => menuGo(toSearch)}>바로 찾기</button>
         </div>
+        {menuOpen && (
+          <nav id="mobile-menu" className="mobile-menu" aria-label="주요 메뉴">
+            <div className="wrap mobile-menu-in">
+              <button type="button" onClick={() => menuGo(() => openArea("trainings"))}>국비 교육</button>
+              <button type="button" onClick={() => menuGo(() => openArea("exams"))}>자격증 시험</button>
+              <button type="button" onClick={() => menuGo(() => openArea("jobs"))}>채용 · 알바</button>
+              <a href="#apply" onClick={() => setMenuOpen(false)}>신청·접수</a>
+              <a href="#faq" onClick={() => setMenuOpen(false)}>자주 묻는 질문</a>
+            </div>
+          </nav>
+        )}
       </header>
 
       <main>
@@ -187,6 +251,7 @@ export default function App() {
             </div>
           </div>
           <HeroTiles hl={hl} loading={hlLoading} onOpen={openArea} />
+          <p className="wrap tiles-swipe" aria-hidden="true">옆으로 밀면 카드가 더 있어요 <Arrow size={16} /></p>
           <p className="wrap tiles-cap">
             {hlLoading ? "전국 숫자를 모으는 중입니다…" : hl ? (
               <>전국 기준 · {agoText(hl.updated_at)} 갱신 · 50·60대 순위는 한국산업인력공단 「2026 국가기술자격 수험자 기초현황」. 카드를 누르면 그 내용부터 열립니다.</>
@@ -199,7 +264,7 @@ export default function App() {
             <div className="finder-intro">
               <p className="kicker">2단계면 끝</p>
               <h2 id="finder-title">내 조건으로 찾기</h2>
-              <p>사는 곳과 관심 분야를 고르고 ‘결과 보기’를 누르세요. 회원가입도, 개인정보 입력도 없습니다.</p>
+              <p>사는 곳과 관심 분야를 고르고 먼저 볼 것(자격증 시험·국비 교육)을 누르세요. 회원가입도, 개인정보 입력도 없습니다.</p>
             </div>
             <form className="board" onSubmit={search}>
               <div className="field">
@@ -228,13 +293,26 @@ export default function App() {
                     </button>
                   ))}
                 </div>
+                {FIELD_EX[preset] && (
+                  <p className="chip-ex" aria-live="polite"><strong>{preset}</strong> 예: {FIELD_EX[preset]}</p>
+                )}
               </fieldset>
 
               <div className="board-foot">
-                <button className="btn-x dark lg" disabled={loading}>
-                  {loading ? <><span className="spin" aria-hidden="true" />찾는 중…</> : <>결과 보기 <Arrow size={20} /></>}
-                </button>
-                <span className="board-goal"><i className={`d-${goal.tone}`} aria-hidden="true" />{goal.label}부터 보여 줍니다</span>
+                {views.map(([k, label]) => (
+                  <button
+                    key={k}
+                    type="button"
+                    className={"btn-x lg " + (k === tab ? "dark" : "line")}
+                    disabled={loading}
+                    onClick={() => search(null, k)}
+                  >
+                    {loading && pending === k
+                      ? <><span className="spin" aria-hidden="true" />찾는 중…</>
+                      : <>{label} 보기 <Arrow size={20} /></>}
+                  </button>
+                ))}
+                <span className="board-goal">누른 내용부터 열려요. 결과에서 다른 탭으로 바꿀 수 있어요.</span>
               </div>
               {error && <p className="alert" role="alert">{error}</p>}
             </form>
@@ -281,6 +359,30 @@ export default function App() {
           )}
         </div>
 
+        <section className="apply" id="apply" aria-labelledby="apply-title">
+          <div className="wrap apply-in">
+            <div className="apply-intro">
+              <p className="kicker">바로 신청하기</p>
+              <h2 id="apply-title">교육 신청·시험 접수 바로 가기</h2>
+              <p>공식 사이트의 신청 화면으로 바로 연결해요. 새 창으로 열립니다.</p>
+            </div>
+            <div className="apply-grid">
+              {APPLY.map((g) => (
+                <article key={g.title} className="apply-card">
+                  <h3>{g.title}</h3>
+                  <ol className="apply-steps">
+                    {g.steps.map((s) => <li key={s}>{s}</li>)}
+                  </ol>
+                  <LinkGrid items={g.links} />
+                  <p className="apply-phone">
+                    전화 문의 <a href={`tel:${g.phone[0]}`}>{g.phone[0]}</a> {g.phone[1]}
+                  </p>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section className="band" id="three" aria-labelledby="band-title">
           <span className="band-curve" aria-hidden="true" />
           <div className="wrap">
@@ -311,28 +413,6 @@ export default function App() {
                   </div>
                 </article>
               ))}
-            </div>
-          </div>
-        </section>
-
-        <section className="fields" aria-labelledby="fields-title">
-          <div className="wrap fields-in">
-            <div className="fields-intro">
-              <h2 id="fields-title">어떤 일을 찾으세요?</h2>
-              <p>분야를 누르면 그 분야로 골라 둔 채 조건 고르기로 이동합니다.</p>
-              <button type="button" className="btn-x dark" onClick={toSearch}>내 조건으로 찾기</button>
-            </div>
-            <div className="field-grid">
-              {meta.presets.map((p) => {
-                const [icon, ex] = FIELDS[p] || ["work", ""];
-                return (
-                  <button key={p} type="button" className={"field-card" + (preset === p ? " on" : "")} onClick={() => pickField(p)}>
-                    <span className="fc-icon"><Icon name={icon} size={20} /></span>
-                    <span className="fc-name">{p}</span>
-                    <span className="fc-ex">{ex}</span>
-                  </button>
-                );
-              })}
             </div>
           </div>
         </section>

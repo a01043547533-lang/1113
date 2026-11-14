@@ -71,8 +71,8 @@ async def _get(path: str, cache: _TTLCache, **params: Any) -> tuple[int, list[di
     return out
 
 
-async def fetch_jobs(search: str | None = None, rows: int = 1000) -> list[dict[str, str]]:
-    params: dict[str, Any] = {"pageNo": 1, "numOfRows": rows}
+async def fetch_jobs(search: str | None = None, rows: int = 1000, page: int = 1) -> list[dict[str, str]]:
+    params: dict[str, Any] = {"pageNo": page, "numOfRows": rows}
     if search:
         params["search"] = search
     return (await _get("SenuriService/getJobList", _cache, **params))[1]

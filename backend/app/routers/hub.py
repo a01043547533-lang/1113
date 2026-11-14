@@ -18,6 +18,7 @@ from app.clients.qnet import fetch_fee, fetch_jm_list, fetch_jm_schedule, fetch_
 from app.clients.senuri import fetch_agencies, fetch_job_detail, fetch_jobs
 from app.clients.work24 import fetch_event_detail, fetch_events, fetch_trainings
 from app.codes import PRESETS, SIDO, SIDO_BRANCHES, SIDO_EVENT_AREA
+from app.jobcount import job_counts
 from app import freshness
 from app.config import get_settings
 
@@ -365,11 +366,12 @@ async def cert(jmcd: str, sido: str = Query(...)):
             rows += await fetch_venues(code)
         return [v.__dict__ for v in clean_venues(rows, sido)]
 
-    sched, fee, ven, trn = await asyncio.gather(
+    sched, fee, ven, trn, jobs = await asyncio.gather(
         _safe(fetch_jm_schedule(jmcd), "시험일정"),
         _safe(fetch_fee(jmcd), "응시료"),
         _safe(venues(), "시험장"),
         _safe(_trainings(sido, training_keyword(name), today, limit=12), "훈련과정"),
+        _safe(job_counts(name, sido, today), "지역별 채용공고 수"),
     )
     st = stats()
     local = st["by_sido"].get(sido, {})
@@ -388,4 +390,5 @@ async def cert(jmcd: str, sido: str = Query(...)):
         "fee": fee if isinstance(fee, dict) and "error" in fee else parse_fee(fee),
         "venues": ven,
         "trainings": trn,
+        "job_counts": jobs,
     }

@@ -139,10 +139,80 @@ function CertDetail({ jmcd, sido }) {
         </ul>
       </section>
 
+      <JobCounts jc={d.job_counts} sido={sido} />
+
       <a className="btn btn-primary btn-md" href={d.qnet_url} target="_blank" rel="noreferrer">
         Q-Net에서 자세히 보고 접수하기 <span aria-hidden="true">→</span>
       </a>
     </div>
+  );
+}
+
+// 자격증 → 시·도별 채용공고 수. 지금은 노인 구인정보(50세 이상 대상) 기준, 나중에 고용24 채용정보로 바뀐다.
+function JobCounts({ jc, sido }) {
+  if (!jc || jc.error) return null;
+  const last = jc.keywords[jc.keywords.length - 1];
+  const code = last.charCodeAt(last.length - 1) - 0xac00;
+  const josa = code >= 0 && code <= 11171 && code % 28 !== 0 ? "이" : "가";   // 받침 있으면 '이'
+  const kw = jc.keywords.map((k) => `‘${k}’`).join("·") + josa;
+  const years = jc.months % 12 === 0 ? `${jc.months / 12}년` : `${jc.months}개월`;
+  const local = jc.local;
+  const shown = jc.regions.filter((r) => r.count > 0).slice(0, 8);
+  if (local.count > 0 && !shown.some((r) => r.is_local)) shown.push(local);
+  const max = Math.max(1, ...shown.map((r) => r.count));
+
+  // '전국 96건'을 지금 지원할 수 있는 공고로 읽지 않게: 기간을 제목에 넣고, 지금 접수 중인 수를 따로 보여 준다
+  return (
+    <section className="box">
+      <h4>최근 {years} 채용공고 <span className="count">전국 {num(jc.national)}건</span></h4>
+      <p className="hint">
+        제목에 {kw} 들어간 50세 이상 대상 공고를 지역별로 셌어요. 대부분 이미 마감된 공고라,
+        어느 지역에서 자주 뽑는지 보는 자료예요. 지역은 {jc.source.region_basis}이에요.
+      </p>
+      <p className="jc-open">
+        {jc.open_now > 0
+          ? <>지금 접수 중인 공고는 <strong>전국 {num(jc.open_now)}건</strong>{local.open > 0 && <>, {local.name} {num(local.open)}건</>}이에요.</>
+          : "지금 접수 중인 공고는 없어요."}
+      </p>
+
+      {local.count > 0 ? (
+        <p className="jc-local">
+          <strong>{local.name} {num(local.count)}건</strong>
+          <span className="muted"> · {jc.regions.length}개 지역 중 {local.rank}위</span>
+        </p>
+      ) : (
+        <p className="jc-local muted">최근 {years} 동안 {local.name}에는 이 자료에 잡힌 공고가 없어요.</p>
+      )}
+
+      {shown.length > 0 && (
+        <ul className="jc-bars">
+          {shown.map((r) => (
+            <li key={r.name} className={r.is_local ? "on" : ""}>
+              <span className="jc-name">{r.name}</span>
+              <span className="jc-track" aria-hidden="true">
+                <span className="jc-bar" style={{ width: `${(r.count / max) * 100}%` }} />
+              </span>
+              <span className="jc-num">{num(r.count)}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {jc.national < 10 && (
+        <p className="hint">이 자료에는 공고가 적어요. 전체 채용공고는 고용24에서 확인해 보세요.</p>
+      )}
+      <ul className="mini">
+        <li>
+          <a href={jc.search_url} target="_blank" rel="noreferrer">
+            고용24에서 ‘{sido} {jc.keywords[0]}’ 공고 찾아보기 <span aria-hidden="true">→</span>
+          </a>
+        </li>
+      </ul>
+      <p className="jc-source">
+        출처: {jc.source.name} · {jc.source.basis} · 같은 회사가 다시 올린 같은 공고는 1건
+        {!jc.complete && " · 공고가 많아 최근 일부만 셌어요"}
+      </p>
+    </section>
   );
 }
 
@@ -358,7 +428,7 @@ export function TrainingTab({ data, sido }) {
 }
 
 // ================================================================ 취업 / 알바
-function LinkGrid({ items }) {
+export function LinkGrid({ items }) {
   return (
     <ul className="links">
       {items.map((l) => (
@@ -452,6 +522,12 @@ export function JobsTab({ senior, agencies, events, links, sido }) {
         {senior?.newest && ` ${md(senior.newest)}까지 올라온 공고라 그사이 마감된 것이 있을 수 있어요.`}
       </p>
       {senior?.error && <Alert title="중장년 채용공고를 불러오지 못했어요.">아래 사이트에서 바로 찾아보세요.</Alert>}
+      {!senior?.error && jobs.length > 0 && senior?.match_count === 0 && (
+        <p className="notice">
+          {(senior.keywords || []).map((k) => `‘${k}’`).join("·")} 관련 공고가 지금 {sido}에 없어서,
+          {" "}{sido}의 다른 중장년 공고를 보여 드려요.
+        </p>
+      )}
       {!senior?.error && jobs.length === 0 && (
         <p className="empty">지금 {sido}에 접수 중인 공고가 없어요. 아래 채용행사와 다른 사이트를 확인해 보세요.</p>
       )}
