@@ -14,7 +14,8 @@ if [ ! -f backend/.env ]; then
 fi
 
 # 같은 줄이 있으면 바꾸고, 없으면 추가(여러 번 실행해도 한 줄만 남음)
-( crontab -l 2>/dev/null | grep -v 'deploy/auto-deploy.sh' ; echo "$LINE" ) | crontab -
+# (crontab 이 아직 없으면 'crontab -l' 이 실패하고, 남길 줄이 없으면 grep 이 실패한다 — pipefail 에 걸리지 않게 || true)
+( crontab -l 2>/dev/null | grep -v 'deploy/auto-deploy.sh' || true ; echo "$LINE" ) | crontab -
 echo "자동 배포 켬: 5분마다 GitHub main 을 확인합니다 (기록: $LOG)"
 crontab -l | grep auto-deploy.sh
 
